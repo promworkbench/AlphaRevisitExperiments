@@ -1,10 +1,10 @@
-package org.processmining.newpackageivy.algorithms;
+package org.processmining.alpharevisitexperiments.algorithms;
 
+import org.processmining.alpharevisitexperiments.models.YourFirstInput;
+import org.processmining.alpharevisitexperiments.models.YourOutput;
+import org.processmining.alpharevisitexperiments.models.YourSecondInput;
+import org.processmining.alpharevisitexperiments.parameters.YourParameters;
 import org.processmining.framework.plugin.PluginContext;
-import org.processmining.newpackageivy.models.YourFirstInput;
-import org.processmining.newpackageivy.models.YourOutput;
-import org.processmining.newpackageivy.models.YourSecondInput;
-import org.processmining.newpackageivy.parameters.YourParameters;
 
 public class YourAlgorithm {
 

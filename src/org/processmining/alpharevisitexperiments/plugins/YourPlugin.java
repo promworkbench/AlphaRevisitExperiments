@@ -1,22 +1,22 @@
-package org.processmining.newpackageivy.plugins;
+package org.processmining.alpharevisitexperiments.plugins;
 
 import java.util.Collection;
 
 import org.deckfour.uitopia.api.event.TaskListener.InteractionResult;
+import org.processmining.alpharevisitexperiments.algorithms.YourAlgorithm;
+import org.processmining.alpharevisitexperiments.connections.YourConnection;
+import org.processmining.alpharevisitexperiments.dialogs.YourDialog;
+import org.processmining.alpharevisitexperiments.help.YourHelp;
+import org.processmining.alpharevisitexperiments.models.YourFirstInput;
+import org.processmining.alpharevisitexperiments.models.YourOutput;
+import org.processmining.alpharevisitexperiments.models.YourSecondInput;
+import org.processmining.alpharevisitexperiments.parameters.YourParameters;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.connections.ConnectionCannotBeObtained;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.plugin.annotations.PluginVariant;
-import org.processmining.newpackageivy.algorithms.YourAlgorithm;
-import org.processmining.newpackageivy.connections.YourConnection;
-import org.processmining.newpackageivy.dialogs.YourDialog;
-import org.processmining.newpackageivy.help.YourHelp;
-import org.processmining.newpackageivy.models.YourFirstInput;
-import org.processmining.newpackageivy.models.YourOutput;
-import org.processmining.newpackageivy.models.YourSecondInput;
-import org.processmining.newpackageivy.parameters.YourParameters;
 
 @Plugin(name = "Your plug-in name", parameterLabels = { "Name of your first input", "Name of your second input", "Name of your parameters" }, 
 	    returnLabels = { "Name of your output" }, returnTypes = { YourOutput.class }, help = YourHelp.TEXT)

@@ -1,8 +1,8 @@
-package org.processmining.newpackageivy.parameters;
+package org.processmining.alpharevisitexperiments.parameters;
 
+import org.processmining.alpharevisitexperiments.models.YourFirstInput;
+import org.processmining.alpharevisitexperiments.models.YourSecondInput;
 import org.processmining.basicutils.parameters.impl.PluginParametersImpl;
-import org.processmining.newpackageivy.models.YourFirstInput;
-import org.processmining.newpackageivy.models.YourSecondInput;
 
 public class YourParameters extends PluginParametersImpl {
 
