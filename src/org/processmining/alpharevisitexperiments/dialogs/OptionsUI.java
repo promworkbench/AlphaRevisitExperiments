@@ -3,10 +3,7 @@ package org.processmining.alpharevisitexperiments.dialogs;
 import com.fluxicon.slickerbox.components.NiceIntegerSlider;
 import com.fluxicon.slickerbox.components.NiceSlider;
 import com.fluxicon.slickerbox.factory.SlickerFactory;
-import org.processmining.alpharevisitexperiments.algorithms.AlgorithmExperiment;
-import org.processmining.alpharevisitexperiments.algorithms.AlphaOneDotOne;
-import org.processmining.alpharevisitexperiments.algorithms.AlphaWithReplay;
-import org.processmining.alpharevisitexperiments.algorithms.StandardAlpha;
+import org.processmining.alpharevisitexperiments.algorithms.*;
 import org.processmining.alpharevisitexperiments.options.ExperimentOption;
 import org.processmining.framework.util.ui.widgets.ProMList;
 

@@ -15,14 +15,29 @@ public class AlphaRevisitExperimentPlugin{
             returnTypes = {AcceptingPetriNet.class},
             userAccessible = true, help = "Try out some experimental algorithms and their options.")
     @UITopiaVariant(affiliation = "RWTH Aachen University", author = "Aaron Küsters, Wil van der Aalst", email = "aaron.kuesters@rwth-aachen.de")
-    public static AcceptingPetriNet helloWorld(UIPluginContext context, XLog log) {
+    public static AcceptingPetriNet runAlphaRevisitPlugin(UIPluginContext context, XLog log) {
         AlgorithmExperiment algo = getExperimentOption(context);
+        context.log("Starting " + algo.name + "...");
+        context.getProgress().setIndeterminate(true);
         if (algo != null) {
             System.out.println(algo.name + " was selected");
-            AcceptingPetriNet acceptingPetriNet = algo.execute(context, log);
-            return acceptingPetriNet;
+            ExperimentRunner runner = new ExperimentRunner(algo,context,log);
+            long startTime = System.nanoTime();
+            context.getExecutor().execute(runner);
+            try {
+                AcceptingPetriNet acceptingPetriNet = runner.get();
+                long duration = System.nanoTime() - startTime;
+                System.out.println("Algorithm finished; Duration: " + duration);
+                return acceptingPetriNet;
+
+            } catch (Exception e) {
+                System.err.println("AlphaRevisit Runner interrupted:" + e.toString());
+                context.getFutureResult(0).cancel(true);
+                return null;
+            }
         }else{
             System.out.println("No algo was selected");
+            context.getFutureResult(0).cancel(true);
             return null;
         }
     }
@@ -32,7 +47,7 @@ public class AlphaRevisitExperimentPlugin{
         TaskListener.InteractionResult result = context.showWizard("Choose an experiment", true, true, dialog);
 
         if (result != TaskListener.InteractionResult.FINISHED) {
-            context.getFutureResult(0).cancel(false);
+            context.getFutureResult(0).cancel(true);
             return null;
         }
 
