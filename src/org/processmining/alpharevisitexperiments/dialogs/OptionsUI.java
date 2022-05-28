@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 public class OptionsUI extends javax.swing.JPanel{
 
-        private final AlgorithmExperiment[] algorithmExperiments = { new StandardAlpha(), new AlphaWithReplay(), new AlphaOneDotOne()};
+        private final AlgorithmExperiment[] algorithmExperiments = { new StandardAlpha(), new AlphaWithReplay(), new AlphaOneDotOne(), new AlphaTwoDotZero()};
         private HashMap<String,Object> optionValues = new HashMap<>();
         private javax.swing.JLabel jLabel1;
         private javax.swing.JLabel jLabel2;

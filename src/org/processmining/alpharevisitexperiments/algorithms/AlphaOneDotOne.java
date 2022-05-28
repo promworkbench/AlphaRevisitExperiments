@@ -123,9 +123,10 @@ public class AlphaOneDotOne extends AlgorithmExperiment {
 
         for (Pair<HashSet<String>, HashSet<String>> e : sel) {
             Place p = net.addPlace(e.toString());
-            if(e.getFirst().contains(START_ACTIVITY)){
-                initialMarking.add(p,1);
-            }else if(e.getSecond().contains(END_ACTIVITY)){
+            if(e.getFirst().contains(START_ACTIVITY)) {
+                initialMarking.add(p, 1);
+            }
+            if(e.getSecond().contains(END_ACTIVITY)){
                 finalMarking.add(p,1);
             }
         }
