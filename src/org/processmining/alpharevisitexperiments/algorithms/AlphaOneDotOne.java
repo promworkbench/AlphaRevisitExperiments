@@ -23,6 +23,7 @@ import static org.processmining.alpharevisitexperiments.util.LogProcessor.START_
 
 public class AlphaOneDotOne extends AlgorithmExperiment {
     private Set<Pair<String,String>> dfRelation;
+    private LogProcessor logProcessor;
     final static ExperimentOption[] options = {
     };
 
@@ -40,7 +41,7 @@ public class AlphaOneDotOne extends AlgorithmExperiment {
         Marking initialMarking = new Marking();
         Marking finalMarking = new Marking();
 
-        LogProcessor logProcessor = new LogProcessor(log);
+        logProcessor = new LogProcessor(log);
         HashSet<String> activities = logProcessor.getActivities();
         HashSet<String> activitiesHat = new HashSet<>(activities);
         activitiesHat.add(START_ACTIVITY);
@@ -178,6 +179,13 @@ public class AlphaOneDotOne extends AlgorithmExperiment {
         }
         return true;
     }
+
+
+
+    public LogProcessor getLogProcessor() {
+        return logProcessor;
+    }
+
 
 }
 
