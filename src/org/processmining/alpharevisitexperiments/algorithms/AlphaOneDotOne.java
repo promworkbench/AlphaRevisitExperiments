@@ -51,7 +51,10 @@ public class AlphaOneDotOne extends AlgorithmExperiment {
 
         Set<Pair<HashSet<String>, HashSet<String>>> initialCnd = new HashSet<>();
         for (Pair<String, String> el : dfRelation) {
-            if(!dfRelation.contains(new Pair<String,String>(el.getSecond(),el.getFirst()))){
+            if(!dfRelation.contains(new Pair<>(el.getSecond(),el.getFirst()))
+            && !dfRelation.contains(new Pair<>(el.getFirst(),el.getFirst()))
+            && !dfRelation.contains(new Pair<>(el.getSecond(),el.getSecond()))
+            ){
                 initialCnd.add(new Pair<HashSet<String>,HashSet<String>>(new HashSet<>(Collections.singleton(el.getFirst())),new HashSet<>(Collections.singleton(el.getSecond()))));
             }
         }
