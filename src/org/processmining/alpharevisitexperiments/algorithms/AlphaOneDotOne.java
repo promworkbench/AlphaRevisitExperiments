@@ -120,7 +120,6 @@ public class AlphaOneDotOne extends AlgorithmExperiment {
             }
         }
         System.out.println("After isMaximal checks TIME"  +TimeUnit.SECONDS.convert(System.nanoTime() - lastTimeStart, TimeUnit.NANOSECONDS));
-
         context.log("Generating final Petri net...");
 
         lastTimeStart = System.nanoTime();
@@ -156,6 +155,8 @@ public class AlphaOneDotOne extends AlgorithmExperiment {
         }
 
         System.out.println("After Petri net built TIME"  +TimeUnit.SECONDS.convert(System.nanoTime() - lastTimeStart, TimeUnit.NANOSECONDS));
+        System.out.println(net.getPlaces().size() + " #Places");
+        System.out.println(net.getEdges().size() + " #Arcs");
 
         return AcceptingPetriNetFactory.createAcceptingPetriNet(net,initialMarking,finalMarking);
     }
