@@ -49,8 +49,10 @@ public class ReplayProcessor {
 
         for (String variant : frequentVariants) {
             System.out.println("- Replaying variant: " + variant);
+
             HashMap<Place, Integer> tokenCount = new HashMap<>();
             String[] trace = variant.split(",");
+// Place initial tokens
             for (Place p : net.getNet().getPlaces()) {
                 if (net.getInitialMarking().contains(p)) {
                     tokenCount.put(p, 1);
@@ -60,17 +62,23 @@ public class ReplayProcessor {
             }
 
             Set<Place> placesToRemove = new HashSet<>();
+
+// Replay trace
             for (String activity : trace) {
+// Check if incoming places have sufficient token
+// Get every place with an arc to the corresponding (fired) transition
                 for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> e : net.getNet()
                         .getInEdges(transitionMap.get(activity))) {
                     PetrinetNode incomingNode = e.getSource();
                     if (incomingNode instanceof Place) {
                         Place p = (Place) incomingNode;
+// Decrease the token count in that place by 1
                         int count = tokenCount.get(p);
                         if (count > 0) {
                             count -= 1;
                             tokenCount.put(p, count);
                         } else {
+// If there is no token in the place, it should be removed
                             System.out.println("No token in place" + p.getLabel() + " -> remove place");
                             placesToRemove.add(p);
                         }
@@ -78,12 +86,14 @@ public class ReplayProcessor {
                         System.err.println("Error: Incoming PN node for transition is not a place?!");
                     }
                 }
-
+// Place tokens in outgoing places
+// Get every place with an arc incoming from the fired transition
                 for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> e : net.getNet()
                         .getOutEdges(transitionMap.get(activity))) {
                     PetrinetNode outgoingNode = e.getTarget();
                     if (outgoingNode instanceof Place) {
                         Place p = (Place) outgoingNode;
+// Increase the token count in that place by 1
                         int count = tokenCount.get(p);
                         count += 1;
                         tokenCount.put(p, count);
@@ -92,20 +102,44 @@ public class ReplayProcessor {
                     }
                 }
             }
+
+// Check final marking: Only places that are in the (selected?) final marking should have 1 token remaining, all others 0
+//            Map<Marking,Integer> violationsPerFinalMarking = new HashMap<>();
+            Map<Marking,Set<Place>> violatingPlacesPerFinalMarking = new HashMap<>();
+
             for (Place p : net.getNet().getPlaces()) {
-                if (net.getFinalMarkings().contains(p)) {
-                    if (tokenCount.get(p) != 1) {
-                        System.out.println("No token in End place: " + p.getLabel());
-                        placesToRemove.add(p);
-                    }
-                } else {
-                    if (tokenCount.get(p) != 0) {
-                        System.out.println("Token left in place " + p.getLabel() + " -> remove place");
-                        placesToRemove.add(p);
+// Keep a list of violating places per final marking (as there are multiple), then choose the best option
+//                i.e., the one with the smallest number of violating places
+                for(Marking m : net.getFinalMarkings()){
+                    if(m.contains(p)){
+                        if(tokenCount.get(p) != 0){
+                            // Violation!
+                            Set<Place> violatingPlaces = violatingPlacesPerFinalMarking.getOrDefault(m,new HashSet<>());
+                            violatingPlaces.add(p);
+                            violatingPlacesPerFinalMarking.put(m,violatingPlaces);
+                        }
+                    }else{
+                        if (tokenCount.get(p) != 0) {
+                            // Violation!
+                            Set<Place> violatingPlaces = violatingPlacesPerFinalMarking.getOrDefault(m,new HashSet<>());
+                            violatingPlaces.add(p);
+                            violatingPlacesPerFinalMarking.put(m,violatingPlaces);
+                        }
                     }
                 }
             }
+            Marking bestFinalMarking = null;
+            for(Marking m : net.getFinalMarkings()){
+                if(bestFinalMarking == null || (violatingPlacesPerFinalMarking.get(m).size() < violatingPlacesPerFinalMarking.get(bestFinalMarking).size())){
+                    // New best final marking found;
+                    bestFinalMarking = m;
+                }
+            }
+// Now add all violating places for selected best final marking to the placesToRemove set
+            placesToRemove.addAll(violatingPlacesPerFinalMarking.getOrDefault(bestFinalMarking, new HashSet<>()));
 
+// Actually remove places that had missing/remaining tokens
+// Respecting the doNotRemoveStartEndPlaces option
             if (doNotRemoveStartEndPlaces) {
                 for (Marking m : net.getFinalMarkings()) {
                     for (Place p : m) {
