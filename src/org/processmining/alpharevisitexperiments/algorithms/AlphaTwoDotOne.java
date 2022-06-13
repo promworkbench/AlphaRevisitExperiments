@@ -97,7 +97,7 @@ public class AlphaTwoDotOne extends AlgorithmExperiment {
                     firstWithoutSecond.removeAll(second);
                     HashSet<String> secondWithoutFirst = new HashSet<>(second);
                     secondWithoutFirst.removeAll(first);
-                    if (checkConditionThree(firstWithoutSecond, secondWithoutFirst) && isNoDFRelationBetweenAsymmetric(first, firstWithoutSecond) && isNoDFRelationBetweenAsymmetric(secondWithoutFirst, second)) { // checks 4 + 5
+                    if (checkConditionThree(firstWithoutSecond, secondWithoutFirst) && isNoDFRelationBetweenAsymmetric(first, firstWithoutSecond) && isNoDFRelationBetweenAsymmetric(secondWithoutFirst, second)) { // checks 3 + 4 + 5
                         allDF++;
                         Pair<HashSet<String>, HashSet<String>> newCandidate = new Pair<>(first, second);
                         if (!cndSet.contains(newCandidate)) {
