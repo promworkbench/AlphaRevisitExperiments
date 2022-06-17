@@ -21,16 +21,17 @@ import java.util.stream.Collectors;
 import static org.processmining.alpharevisitexperiments.util.LogProcessor.END_ACTIVITY;
 import static org.processmining.alpharevisitexperiments.util.LogProcessor.START_ACTIVITY;
 
-public class AlphaTwoDotOne extends AlgorithmExperiment {
-    private Set<Pair<String, String>> dfRelation;
+public class AlphaThreeDotZero extends AlgorithmExperiment {
+    final static ExperimentOption[] options = {
+            new ExperimentOption<>(Double.class, "balance_value", "Balance for candidate selection", 1.0, 0.0, 1.0),
+            new ExperimentOption<>(Boolean.class, "balance_ignore_startend", "Always include potential start/end places for b-balanced candidates.", false),
 
+    };
+    private Set<Pair<String, String>> dfRelation;
     private LogProcessor logProcessor;
 
-    final static ExperimentOption[] options = {
-    };
-
-    public AlphaTwoDotOne() {
-        super("Alpha 2.0", options);
+    public AlphaThreeDotZero() {
+        super("Alpha 3.0", options);
     }
 
     @Override
@@ -68,7 +69,7 @@ public class AlphaTwoDotOne extends AlgorithmExperiment {
         context.log("Building initial candidate set...");
         ArrayList<Pair<HashSet<String>, HashSet<String>>> cnd = new ArrayList<>(initialCnd);
         cnd.addAll(expandCandidates);
-        HashSet<Pair<HashSet<String>, HashSet<String>>> cndSet = new HashSet<>(initialCnd);
+        Set<Pair<HashSet<String>, HashSet<String>>> cndSet = new HashSet<>(initialCnd);
 
         System.out.println("Cnd and cndset built TIME" + TimeUnit.SECONDS.convert(System.nanoTime() - lastTimeStart, TimeUnit.NANOSECONDS));
         context.log("Recursively generating new candidates...");
@@ -119,6 +120,16 @@ public class AlphaTwoDotOne extends AlgorithmExperiment {
         System.out.println("newlyAdded:" + newlyAdded + " wereAlreadyAdded:" + wereAlreadyAdded);
         System.out.println("notDFAll:" + notDFAll + " allDF:" + allDF);
         System.out.println("After cnd loop TIME" + TimeUnit.SECONDS.convert(System.nanoTime() - lastTimeStart, TimeUnit.NANOSECONDS));
+        double b = getOptionValueByID("balance_value");
+        boolean ignoreBalanceForStartEnd = getOptionValueByID("balance_ignore_startend");
+
+        cndSet = cndSet.stream().filter(c -> {
+            if (ignoreBalanceForStartEnd && (c.getFirst().contains(START_ACTIVITY) || c.getSecond().contains(END_ACTIVITY))) {
+                return true;
+            }
+            double candidateBalance = getBalance(c.getFirst(), c.getSecond());
+            return candidateBalance <= b;
+        }).collect(Collectors.toSet());
 
         context.log("Filtering out maximal candidates...");
 
@@ -218,10 +229,10 @@ public class AlphaTwoDotOne extends AlgorithmExperiment {
         return true;
     }
 
-    private boolean checkConditionThree(Collection<String> as, Collection<String> bs){
-        for(String a : as){
-            for(String b : bs){
-                if(!dfRelation.contains(new Pair<>(b,a))){
+    private boolean checkConditionThree(Collection<String> as, Collection<String> bs) {
+        for (String a : as) {
+            for (String b : bs) {
+                if (!dfRelation.contains(new Pair<>(b, a))) {
                     return true;
                 }
             }
@@ -231,6 +242,21 @@ public class AlphaTwoDotOne extends AlgorithmExperiment {
 
     public LogProcessor getLogProcessor() {
         return logProcessor;
+    }
+
+    private double getBalance(Collection<String> as, Collection<String> bs) {
+        double countAs = getNumberOfOccurrences(as);
+        double countBs = getNumberOfOccurrences(bs);
+
+        return Math.abs(countAs - countBs) / (Math.max(countAs, countBs));
+    }
+
+    private int getNumberOfOccurrences(Collection<String> as) {
+        int sum = 0;
+        for (String act : as) {
+            sum += logProcessor.getActivityOccurrence(act);
+        }
+        return sum;
     }
 }
 

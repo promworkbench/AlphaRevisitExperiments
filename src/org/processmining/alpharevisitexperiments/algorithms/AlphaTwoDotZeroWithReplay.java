@@ -13,7 +13,7 @@ public class AlphaTwoDotZeroWithReplay extends AlgorithmExperiment{
     final AlphaTwoDotZero alphaTwoDotZero = new AlphaTwoDotZero();
 
     public AlphaTwoDotZeroWithReplay() {
-        super("Alpha 2.0 with replay",options);
+        super("Alpha 2.0 legacy with replay", options);
     }
 
 

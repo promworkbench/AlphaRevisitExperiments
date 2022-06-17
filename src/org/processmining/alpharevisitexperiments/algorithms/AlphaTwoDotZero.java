@@ -30,7 +30,7 @@ public class AlphaTwoDotZero extends AlgorithmExperiment {
     };
 
     public AlphaTwoDotZero() {
-        super("Alpha 2.0", options);
+        super("Alpha 2.0 legacy", options);
     }
 
     @Override

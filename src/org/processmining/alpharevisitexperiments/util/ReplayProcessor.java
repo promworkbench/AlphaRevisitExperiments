@@ -2,7 +2,6 @@ package org.processmining.alpharevisitexperiments.util;
 
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.alpharevisitexperiments.options.ExperimentOption;
-import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetEdge;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
@@ -16,8 +15,8 @@ public class ReplayProcessor {
     public final static String FREQUENT_VARIANT_OPTION_ID = "replay_frequent_variants";
     public final static String DO_NOT_REMOVE_STARTEND_PLACES_OPTION_ID = "do_not_remove_startend_places";
     public final static ExperimentOption[] STANDARD_REPLAY_OPTIONS = {
-            new ExperimentOption<>(Integer.class, FREQUENT_VARIANT_OPTION_ID, "top% of frequent variants to use for replay and place removal", 0, 0, 100),
-            new ExperimentOption<>(Boolean.class, DO_NOT_REMOVE_STARTEND_PLACES_OPTION_ID, "Do not remove places that are in the start or end marking.", false),
+            new ExperimentOption<>(Integer.class, FREQUENT_VARIANT_OPTION_ID, "Cover this percentage of all traces with the frequent variants used for replay and place removal", 0, 0, 100),
+            new ExperimentOption<>(Boolean.class, DO_NOT_REMOVE_STARTEND_PLACES_OPTION_ID, "Do not remove places that part of a start or end marking.", false),
 //            new ExperimentOption<>(Boolean.class,"try_connect","Try to connect disconnected transitions",false),
     };
 

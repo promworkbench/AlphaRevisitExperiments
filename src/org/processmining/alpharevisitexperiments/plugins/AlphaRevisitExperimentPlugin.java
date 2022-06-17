@@ -5,11 +5,22 @@ import org.deckfour.xes.model.XLog;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.alpharevisitexperiments.algorithms.AlgorithmExperiment;
 import org.processmining.alpharevisitexperiments.dialogs.OptionsUI;
+import org.processmining.alpharevisitexperiments.ui.AlphaRevisitExperimentsVisualizer;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.plugin.annotations.Plugin;
 
-public class AlphaRevisitExperimentPlugin{
+public class AlphaRevisitExperimentPlugin {
+    @Plugin(name = "Alpha Revisit Experiments (Interactive)", parameterLabels = {},
+            returnLabels = {"Alpha Revisit Interactive View"},
+            returnTypes = {AlphaRevisitExperimentsVisualizer.class},
+            userAccessible = true, help = "Try out some experimental algorithms and their options in the interactive mode, where you can change to different algorithms and options on the fly.")
+    @UITopiaVariant(affiliation = "RWTH Aachen University", author = "Aaron Küsters, Wil van der Aalst", email = "aaron.kuesters@rwth-aachen.de")
+    public static AlphaRevisitExperimentsVisualizer runAlphaRevisitVisualPlugin(UIPluginContext context, XLog log) {
+        return new AlphaRevisitExperimentsVisualizer(context, log);
+    }
+
+
     @Plugin(name = "Alpha Revisit Experiments", parameterLabels = {},
             returnLabels = {"Accepting Petrinet"},
             returnTypes = {AcceptingPetriNet.class},
@@ -21,7 +32,7 @@ public class AlphaRevisitExperimentPlugin{
         context.getProgress().setIndeterminate(true);
         if (algo != null) {
             System.out.println(algo.name + " was selected");
-            ExperimentRunner runner = new ExperimentRunner(algo,context,log);
+            ExperimentRunner runner = new ExperimentRunner(algo, context, log);
             long startTime = System.nanoTime();
             context.getExecutor().execute(runner);
             try {
@@ -35,7 +46,7 @@ public class AlphaRevisitExperimentPlugin{
                 context.getFutureResult(0).cancel(true);
                 return null;
             }
-        }else{
+        } else {
             System.out.println("No algo was selected");
             context.getFutureResult(0).cancel(true);
             return null;
