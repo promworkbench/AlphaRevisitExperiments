@@ -20,7 +20,7 @@ public class OptionsUI extends javax.swing.JPanel {
             new AlphaOneDotOne(), new AlphaOneDotOneWithReplay(),
 //                new AlphaTwoDotZero(), new AlphaTwoDotZeroWithReplay(),
             new AlphaTwoDotOne(), new AlphaTwoDotOneWithReplay(),
-            new AlphaThreeDotZero()};
+            new AlphaThreeDotZero(), new AlphaThreeDotZeroWithReplay()};
     private HashMap<String, Object> optionValues = new HashMap<>();
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
