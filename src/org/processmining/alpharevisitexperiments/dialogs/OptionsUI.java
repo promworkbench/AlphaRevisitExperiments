@@ -85,52 +85,26 @@ public class OptionsUI extends javax.swing.JPanel {
 
         jPanel1.setLayout(new BoxLayout(jPanel1, BoxLayout.Y_AXIS));
         jLabel2.setText("Select further options");
+        jLabel2.setAlignmentX(CENTER_ALIGNMENT);
         final Color bgColor = new Color(0xB0B0B0);
+        setBackground(bgColor);
         jPanel1.setBackground(bgColor);
         optionsScrollPane.setBackground(bgColor);
+        jLabel2.setBackground(bgColor);
 
         BorderLayout layout = new BorderLayout();
         JPanel variantPanel = new JPanel();
+        variantPanel.setBackground(bgColor);
         variantPanel.setLayout(new BoxLayout(variantPanel, BoxLayout.Y_AXIS));
         variantPanel.add(jLabel1);
         variantPanel.add(variantList);
         variantList.setPreferredSize(new Dimension(200, 200));
-//            variantPanel.setMinimumSize(new Dimension(500,500));
 
         JPanel optionsPanel = new JPanel();
+        optionsPanel.setBackground(bgColor);
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
         optionsPanel.add(jLabel2, LEFT_ALIGNMENT);
-//            optionsPanel.setPreferredSize(new Dimension(500,500));
         optionsPanel.add(optionsScrollPane);
-
-//            layout.setHorizontalGroup(
-//                    layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//                            .addGroup(layout.createParallelGroup()
-//                                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//                                            .addComponent(jLabel1)
-//                                            .addComponent(variantList, GroupLayout.PREFERRED_SIZE, 176, GroupLayout.PREFERRED_SIZE))
-////                                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-//                                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//                                            .addGroup(layout.createSequentialGroup()
-//                                                    .addComponent(jLabel2)
-//                                                    .addGap(105))
-//                                            .addGroup(layout.createSequentialGroup()
-//                                                    .addComponent(optionsScrollPane, GroupLayout.DEFAULT_SIZE, 466, Short.MAX_VALUE)
-//                                                    .addContainerGap())))
-//            );
-//            layout.setVerticalGroup(
-//                    layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//                            .addGroup(layout.createSequentialGroup()
-//                                    .addContainerGap()
-//                                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-//                                            .addComponent(jLabel1)
-//                                            .addComponent(jLabel2))
-//                                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-//                                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//                                            .addComponent(optionsScrollPane, GroupLayout.DEFAULT_SIZE, 253, Short.MAX_VALUE)
-//                                            .addComponent(variantList, GroupLayout.DEFAULT_SIZE, 253, Short.MAX_VALUE))
-//                                    .addContainerGap())
-//            );
         this.setLayout(layout);
         if (compactMode) {
             add(variantPanel, BorderLayout.NORTH);
@@ -160,50 +134,51 @@ public class OptionsUI extends javax.swing.JPanel {
 //            jPanel1.setLayout(new GridLayout(options.length,1,3,3));
         jPanel1.setLayout(new BoxLayout(jPanel1, BoxLayout.Y_AXIS));
         jPanel1.setAlignmentY(TOP_ALIGNMENT);
+        jPanel1.setAlignmentX(LEFT_ALIGNMENT);
         optionValues = new HashMap<>();
         for (ExperimentOption option : options) {
+//            option.setValue(option.getStartValue());
             JPanel panel = new JPanel();
             panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
             panel.setAlignmentX(LEFT_ALIGNMENT);
             JTextArea jLabelName = createLabelWithTextWrap(option.getName());
             jLabelName.setAlignmentX(LEFT_ALIGNMENT);
-//                JLabel jLabelName =  new JLabel(String.format("<html><body style=\"width:%dpx;\"><p>%s</p></body></html>", SIDE_PANEL_WIDTH - 100,option.getName()), SwingConstants.LEFT);
-//                panel.setMaximumSize(new Dimension(SIDE_PANEL_WIDTH,1000));
             jLabelName.setFont(new Font("Dialog", Font.BOLD, 16));
-//                GridBagConstraints c = new GridBagConstraints();
-//                c.weightx = 0.5;
-//                c.weighty = 0.5;
-//                c.gridx = 0;
-//                c.gridy = 0;
-//                c.fill = GridBagConstraints.HORIZONTAL;
+
 
             panel.add(new JSeparator());
             panel.add(jLabelName);
             panel.setOpaque(false);
             if (option.getType() == Integer.class) {
                 ExperimentOption<Integer> integerOption = (ExperimentOption<Integer>) option;
-                NiceIntegerSlider jslider = SlickerFactory.instance().createNiceIntegerSlider("Select a value", integerOption.getMinValue(),
+                NiceIntegerSlider jslider = SlickerFactory.instance().createNiceIntegerSlider("Select", integerOption.getMinValue(),
                         integerOption.getMaxValue(), integerOption.getStartValue(), NiceSlider.Orientation.HORIZONTAL);
-                jslider.setValue(integerOption.getStartValue());
+                jslider.setValue(integerOption.getValue());
                 jslider.setAlignmentX(LEFT_ALIGNMENT);
                 jslider.addChangeListener(e -> integerOption.setValue(jslider.getValue()));
                 panel.add(jslider);
             } else if (option.getType() == Boolean.class) {
                 ExperimentOption<Boolean> booleanOption = (ExperimentOption<Boolean>) option;
                 JCheckBox checkbox = SlickerFactory.instance().createCheckBox(booleanOption.getName(), booleanOption.getStartValue());
+                checkbox.setSelected(booleanOption.getValue());
                 checkbox.addChangeListener(e -> booleanOption.setValue(checkbox.isSelected()));
                 panel.add(checkbox);
             } else if (option.getType() == Double.class) {
+//                panel.setLayout(new BorderLayout());
                 JPanel valuePanel = new JPanel();
                 valuePanel.setOpaque(false);
+                valuePanel.setAlignmentX(LEFT_ALIGNMENT);
+                valuePanel.setLayout(new BorderLayout());
                 ExperimentOption<Double> doubleOption = (ExperimentOption<Double>) option;
+
                 JTextField doubleOptionExact = new JTextField(doubleOption.getValue().toString());
                 doubleOptionExact.setOpaque(false);
                 doubleOptionExact.setFont(new Font("Dialog", Font.BOLD, 14));
-                doubleOptionExact.setMinimumSize(new Dimension(100, 10));
-                NiceDoubleSlider slider = SlickerFactory.instance().createNiceDoubleSlider("Select a value", doubleOption.getMinValue(), doubleOption.getMaxValue(), doubleOption.getStartValue(), NiceSlider.Orientation.HORIZONTAL);
-                slider.setValue(doubleOption.getValue());
+                doubleOptionExact.setAlignmentX(CENTER_ALIGNMENT);
+                NiceDoubleSlider slider = SlickerFactory.instance().createNiceDoubleSlider("Select", doubleOption.getMinValue(), doubleOption.getMaxValue(), doubleOption.getStartValue(), NiceSlider.Orientation.HORIZONTAL);
                 slider.setAlignmentX(LEFT_ALIGNMENT);
+                slider.setValue(doubleOption.getValue());
+//                slider.setMaximumSize(new Dimension(slider.getPreferredSize().width - 50, slider.getPreferredSize().height));
                 slider.addChangeListener(e -> {
                     doubleOption.setValue(slider.getValue());
                     doubleOptionExact.setText(doubleOption.getValue().toString());
@@ -219,19 +194,17 @@ public class OptionsUI extends javax.swing.JPanel {
                     }
 
                 });
-                slider.setMaximumSize(slider.getPreferredSize());
-                valuePanel.setPreferredSize(new Dimension(100, 70));
-                valuePanel.add(slider);
-                valuePanel.add(doubleOptionExact);
+                valuePanel.add(slider, BorderLayout.CENTER);
+                valuePanel.add(doubleOptionExact, BorderLayout.PAGE_START);
                 panel.add(valuePanel);
+
             } else {
                 System.err.println("Other options not yet implemented!");
             }
 
-            panel.setMaximumSize(new Dimension(panel.getPreferredSize().width, panel.getPreferredSize().height + 50));
+            panel.setMaximumSize(new Dimension(panel.getPreferredSize().width, panel.getPreferredSize().height + 40));
             jPanel1.add(panel);
         }
-//            jPanel1.add(Box.createVerticalGlue());
         optionsScrollPane.setViewportView(jPanel1);
         this.jPanel1.validate();
         this.jPanel1.repaint();

@@ -109,7 +109,7 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
         AcceptingPetriNet sampleANet = new AcceptingPetriNetImpl(sampleNet);
         final ProMResource<?> sampleANetRes = createProMResourceFromAPN(context, sampleANet, "Sample net");
         viewTypes = context.getGlobalContext().getViewManager().getViewTypes(sampleANetRes);
-        sampleANetRes.setFavorite(true);
+        sampleANetRes.destroy();
 
         viewSelector.removeAllItems();
         for (ViewType viewType : viewTypes) {
@@ -123,14 +123,17 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
         });
         saveNetButton.setEnabled(false);
         saveNetButton.addActionListener(e -> {
-            this.netRes.setFavorite(true);
-//           Adding a dummy net and removing it again fixes a weird glitch, where a new (favorite) APN does only appear
-//            when switching views in the object menu
-            Petrinet newSampleNet = PetrinetFactory.newPetrinet("Sample Petri net");
-            AcceptingPetriNet newSampleANet = new AcceptingPetriNetImpl(sampleNet);
-            final ProMResource<?> newSampleANetRes = createProMResourceFromAPN(context, sampleANet, "Sample net 2");
-            newSampleANetRes.setFavorite(true);
-            newSampleANetRes.destroy();
+            if (this.netRes != null && !this.netRes.isDestroyed()) {
+                this.netRes.setFavorite(true);
+                //           Adding a dummy net and removing it again fixes a weird glitch, where a new (favorite) APN does only appear
+                //            when switching views in the object menu
+                Petrinet newSampleNet = PetrinetFactory.newPetrinet("Sample Petri net");
+                AcceptingPetriNet newSampleANet = new AcceptingPetriNetImpl(newSampleNet);
+                final ProMResource<?> newSampleANetRes = createProMResourceFromAPN(context, newSampleANet, "Sample net 2");
+                newSampleANetRes.destroy();
+            } else {
+                JOptionPane.showMessageDialog(null, "The mined Petri net is not available. Please mine a new model.");
+            }
         });
 
 //      Execute selected plugin with given options and display the resulting net
@@ -176,12 +179,16 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
     }
 
     private void createNetVis() {
-        netVis.removeAll();
-        netVis.revalidate();
-        netVis.repaint();
-        this.view = viewTypes.get(selectedViewType).createView(this.netRes);
-        JComponent newNetVis = this.view.getViewComponent();
-        netVis.add(newNetVis);
+        if (this.netRes != null && !this.netRes.isDestroyed()) {
+            netVis.removeAll();
+            netVis.revalidate();
+            netVis.repaint();
+            this.view = viewTypes.get(selectedViewType).createView(this.netRes);
+            JComponent newNetVis = this.view.getViewComponent();
+            netVis.add(newNetVis);
+        } else {
+            JOptionPane.showMessageDialog(null, "The mined Petri net is not available. Please mine a new model.");
+        }
     }
 
 
