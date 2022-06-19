@@ -24,8 +24,7 @@ import static org.processmining.alpharevisitexperiments.util.LogProcessor.START_
 public class AlphaThreeDotZero extends AlgorithmExperiment {
     final static ExperimentOption[] options = {
             new ExperimentOption<>(Double.class, "balance_value", "Balance for candidate selection", 1.0, 0.0, 1.0),
-            new ExperimentOption<>(Boolean.class, "balance_ignore_startend", "Always include potential start/end places for b-balanced candidates.", false),
-
+//            new ExperimentOption<>(Boolean.class, "balance_ignore_startend", "Always include potential start/end places for b-balanced candidates.", false),
     };
     private Set<Pair<String, String>> dfRelation;
     private LogProcessor logProcessor;
@@ -121,12 +120,12 @@ public class AlphaThreeDotZero extends AlgorithmExperiment {
         System.out.println("notDFAll:" + notDFAll + " allDF:" + allDF);
         System.out.println("After cnd loop TIME" + TimeUnit.SECONDS.convert(System.nanoTime() - lastTimeStart, TimeUnit.NANOSECONDS));
         double b = getOptionValueByID("balance_value");
-        boolean ignoreBalanceForStartEnd = getOptionValueByID("balance_ignore_startend");
+//        boolean ignoreBalanceForStartEnd = getOptionValueByID("balance_ignore_startend");
 
         cndSet = cndSet.stream().filter(c -> {
-            if (ignoreBalanceForStartEnd && (c.getFirst().contains(START_ACTIVITY) || c.getSecond().contains(END_ACTIVITY))) {
-                return true;
-            }
+//            if (ignoreBalanceForStartEnd && (c.getFirst().contains(START_ACTIVITY) || c.getSecond().contains(END_ACTIVITY))) {
+//                return true;
+//            }
             double candidateBalance = getBalance(c.getFirst(), c.getSecond());
             return candidateBalance <= b;
         }).collect(Collectors.toSet());
@@ -247,7 +246,6 @@ public class AlphaThreeDotZero extends AlgorithmExperiment {
     private double getBalance(Collection<String> as, Collection<String> bs) {
         double countAs = getNumberOfOccurrences(as);
         double countBs = getNumberOfOccurrences(bs);
-
         return Math.abs(countAs - countBs) / (Math.max(countAs, countBs));
     }
 

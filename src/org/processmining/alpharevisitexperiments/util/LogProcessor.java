@@ -23,12 +23,11 @@ public class LogProcessor {
             String[] currentTrace = new String[trace.size() + 2];
             currentTrace[0] = START_ACTIVITY;
             currentTrace[trace.size() + 1] = END_ACTIVITY;
+            increaseActivityOccurenceByOne(START_ACTIVITY);
+            increaseActivityOccurenceByOne(END_ACTIVITY);
             for (int i = 0; i < trace.size(); i++) {
                 String activity = trace.get(i).getAttributes().get("concept:name").toString().replaceAll(",", "_");
-
-                int count = activityOccurrences.getOrDefault(activity, 0);
-                count += 1;
-                activityOccurrences.put(activity, count);
+                increaseActivityOccurenceByOne(activity);
 
                 activities.add(activity);
                 currentTrace[i + 1] = activity;
@@ -47,10 +46,16 @@ public class LogProcessor {
                 previousActivity = activity;
             }
 
-            Pair<String, String> edge = new Pair<String,String>(previousActivity,END_ACTIVITY);
+            Pair<String, String> edge = new Pair<String, String>(previousActivity, END_ACTIVITY);
             Integer currentValue = dfg.getOrDefault(edge, 0);
-            dfg.put(edge,currentValue + 1);
+            dfg.put(edge, currentValue + 1);
         }
+    }
+
+    private void increaseActivityOccurenceByOne(String activity) {
+        int count = activityOccurrences.getOrDefault(activity, 0);
+        count += 1;
+        activityOccurrences.put(activity, count);
     }
 
     public HashMap<Pair<String, String>, Integer> getDfg() {
