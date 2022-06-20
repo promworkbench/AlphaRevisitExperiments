@@ -7,10 +7,10 @@ import org.processmining.contexts.uitopia.UIPluginContext;
 
 import javax.swing.*;
 
-public class ExperimentRunner extends SwingWorker<AcceptingPetriNet,Void> {
-    private AlgorithmExperiment experiment;
-    private UIPluginContext context;
-    private XLog log;
+public class ExperimentRunner extends SwingWorker<AcceptingPetriNet, Void> {
+    private final AlgorithmExperiment experiment;
+    private final UIPluginContext context;
+    private final XLog log;
 
     public ExperimentRunner(AlgorithmExperiment experiment, UIPluginContext context, XLog log) {
         this.experiment = experiment;
@@ -20,6 +20,6 @@ public class ExperimentRunner extends SwingWorker<AcceptingPetriNet,Void> {
 
     @Override
     protected AcceptingPetriNet doInBackground() throws Exception {
-        return experiment.execute(context,log);
+        return experiment.execute(context, log);
     }
 }

@@ -11,12 +11,12 @@ import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.semantics.petrinet.Marking;
 
-public class StandardAlpha extends AlgorithmExperiment{
+public class StandardAlpha extends AlgorithmExperiment {
     final static ExperimentOption[] options = {
     };
 
     public StandardAlpha() {
-        super("Standard alpha",options);
+        super("Standard alpha", options);
     }
 
     @Override

@@ -22,12 +22,10 @@ import static org.processmining.alpharevisitexperiments.util.LogProcessor.END_AC
 import static org.processmining.alpharevisitexperiments.util.LogProcessor.START_ACTIVITY;
 
 public class AlphaTwoDotZero extends AlgorithmExperiment {
-    private Set<Pair<String, String>> dfRelation;
-
-    private LogProcessor logProcessor;
-
     final static ExperimentOption[] options = {
     };
+    private Set<Pair<String, String>> dfRelation;
+    private LogProcessor logProcessor;
 
     public AlphaTwoDotZero() {
         super("Alpha 2.0 legacy", options);

@@ -22,12 +22,10 @@ import static org.processmining.alpharevisitexperiments.util.LogProcessor.END_AC
 import static org.processmining.alpharevisitexperiments.util.LogProcessor.START_ACTIVITY;
 
 public class AlphaTwoDotOne extends AlgorithmExperiment {
-    private Set<Pair<String, String>> dfRelation;
-
-    private LogProcessor logProcessor;
-
     final static ExperimentOption[] options = {
     };
+    private Set<Pair<String, String>> dfRelation;
+    private LogProcessor logProcessor;
 
     public AlphaTwoDotOne() {
         super("Alpha 2.0", options);
@@ -218,10 +216,10 @@ public class AlphaTwoDotOne extends AlgorithmExperiment {
         return true;
     }
 
-    private boolean checkConditionThree(Collection<String> as, Collection<String> bs){
-        for(String a : as){
-            for(String b : bs){
-                if(!dfRelation.contains(new Pair<>(b,a))){
+    private boolean checkConditionThree(Collection<String> as, Collection<String> bs) {
+        for (String a : as) {
+            for (String b : bs) {
+                if (!dfRelation.contains(new Pair<>(b, a))) {
                     return true;
                 }
             }

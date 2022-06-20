@@ -11,11 +11,11 @@ public class LogProcessor {
 
     public final static String START_ACTIVITY = "__START";
     public final static String END_ACTIVITY = "__END";
-    private HashMap<Pair<String, String>, Integer> dfg = new HashMap<>();
-    private HashMap<String, Integer> variants = new HashMap<>();
+    private final HashMap<Pair<String, String>, Integer> dfg = new HashMap<>();
+    private final HashMap<String, Integer> variants = new HashMap<>();
 
-    private HashMap<String, Integer> activityOccurrences = new HashMap<>();
-    private HashSet<String> activities = new HashSet<>();
+    private final HashMap<String, Integer> activityOccurrences = new HashMap<>();
+    private final HashSet<String> activities = new HashSet<>();
 
     public LogProcessor(XLog log) {
         for (XTrace trace : log) {

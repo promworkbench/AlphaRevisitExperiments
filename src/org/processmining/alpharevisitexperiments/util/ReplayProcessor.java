@@ -104,32 +104,32 @@ public class ReplayProcessor {
 
 // Check final marking: Only places that are in the (selected?) final marking should have 1 token remaining, all others 0
 //            Map<Marking,Integer> violationsPerFinalMarking = new HashMap<>();
-            Map<Marking,Set<Place>> violatingPlacesPerFinalMarking = new HashMap<>();
+            Map<Marking, Set<Place>> violatingPlacesPerFinalMarking = new HashMap<>();
 
             for (Place p : net.getNet().getPlaces()) {
 // Keep a list of violating places per final marking (as there are multiple), then choose the best option
 //                i.e., the one with the smallest number of violating places
-                for(Marking m : net.getFinalMarkings()){
-                    if(m.contains(p)){
-                        if(tokenCount.get(p) != 0){
-                            // Violation!
-                            Set<Place> violatingPlaces = violatingPlacesPerFinalMarking.getOrDefault(m,new HashSet<>());
-                            violatingPlaces.add(p);
-                            violatingPlacesPerFinalMarking.put(m,violatingPlaces);
-                        }
-                    }else{
+                for (Marking m : net.getFinalMarkings()) {
+                    if (m.contains(p)) {
                         if (tokenCount.get(p) != 0) {
                             // Violation!
-                            Set<Place> violatingPlaces = violatingPlacesPerFinalMarking.getOrDefault(m,new HashSet<>());
+                            Set<Place> violatingPlaces = violatingPlacesPerFinalMarking.getOrDefault(m, new HashSet<>());
                             violatingPlaces.add(p);
-                            violatingPlacesPerFinalMarking.put(m,violatingPlaces);
+                            violatingPlacesPerFinalMarking.put(m, violatingPlaces);
+                        }
+                    } else {
+                        if (tokenCount.get(p) != 0) {
+                            // Violation!
+                            Set<Place> violatingPlaces = violatingPlacesPerFinalMarking.getOrDefault(m, new HashSet<>());
+                            violatingPlaces.add(p);
+                            violatingPlacesPerFinalMarking.put(m, violatingPlaces);
                         }
                     }
                 }
             }
             Marking bestFinalMarking = null;
-            for(Marking m : net.getFinalMarkings()){
-                if(bestFinalMarking == null || (violatingPlacesPerFinalMarking.get(m).size() < violatingPlacesPerFinalMarking.get(bestFinalMarking).size())){
+            for (Marking m : net.getFinalMarkings()) {
+                if (bestFinalMarking == null || (violatingPlacesPerFinalMarking.get(m).size() < violatingPlacesPerFinalMarking.get(bestFinalMarking).size())) {
                     // New best final marking found;
                     bestFinalMarking = m;
                 }

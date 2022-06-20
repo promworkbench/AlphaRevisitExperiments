@@ -1,6 +1,7 @@
 package org.processmining.alpharevisitexperiments.plugins;
 
 import org.deckfour.uitopia.api.event.TaskListener;
+import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.model.XLog;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.alpharevisitexperiments.algorithms.AlgorithmExperiment;
@@ -27,6 +28,7 @@ public class AlphaRevisitExperimentPlugin {
             userAccessible = true, help = "Try out some experimental algorithms and their options.")
     @UITopiaVariant(affiliation = "RWTH Aachen University", author = "Aaron Küsters, Wil van der Aalst", email = "aaron.kuesters@rwth-aachen.de")
     public static AcceptingPetriNet runAlphaRevisitPlugin(UIPluginContext context, XLog log) {
+        String logName = XConceptExtension.instance().extractName(log);
         AlgorithmExperiment algo = getExperimentOption(context);
         context.log("Starting " + algo.name + "...");
         context.getProgress().setIndeterminate(true);
@@ -39,10 +41,11 @@ public class AlphaRevisitExperimentPlugin {
                 AcceptingPetriNet acceptingPetriNet = runner.get();
                 long duration = System.nanoTime() - startTime;
                 System.out.println("Algorithm finished; Duration: " + duration);
+                context.getFutureResult(0).setLabel("Accepting Petri net of " + logName + " mined with " + algo.name);
                 return acceptingPetriNet;
 
             } catch (Exception e) {
-                System.err.println("AlphaRevisit Runner interrupted:" + e.toString());
+                System.err.println("AlphaRevisit Runner interrupted:" + e);
                 context.getFutureResult(0).cancel(true);
                 return null;
             }

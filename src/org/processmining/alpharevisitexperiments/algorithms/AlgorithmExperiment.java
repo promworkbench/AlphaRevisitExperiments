@@ -8,8 +8,8 @@ import org.processmining.contexts.uitopia.UIPluginContext;
 import java.util.Arrays;
 
 public abstract class AlgorithmExperiment {
-    private ExperimentOption[] options;
     public final String name;
+    private ExperimentOption[] options;
 
     protected AlgorithmExperiment(String name, ExperimentOption[] options) {
         this.name = name;

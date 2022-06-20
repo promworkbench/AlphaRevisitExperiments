@@ -54,7 +54,7 @@ public class OptionsUI extends javax.swing.JPanel {
     private void initComponents(boolean compactMode) {
 
         AbstractListModel listModel = new javax.swing.AbstractListModel<AlgorithmExperiment>() {
-            AlgorithmExperiment[] experiments = algorithmExperiments;
+            final AlgorithmExperiment[] experiments = algorithmExperiments;
 
             public int getSize() {
                 return experiments.length;

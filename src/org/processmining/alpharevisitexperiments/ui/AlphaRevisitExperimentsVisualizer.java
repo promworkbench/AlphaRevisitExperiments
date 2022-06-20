@@ -9,15 +9,11 @@ import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.acceptingpetrinet.models.impl.AcceptingPetriNetImpl;
 import org.processmining.alpharevisitexperiments.algorithms.AlgorithmExperiment;
 import org.processmining.alpharevisitexperiments.dialogs.OptionsUI;
-import org.processmining.alpharevisitexperiments.plugins.ExperimentRunner;
 import org.processmining.alpharevisitexperiments.util.LogProcessor;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.contexts.uitopia.annotations.Visualizer;
 import org.processmining.contexts.uitopia.model.ProMResource;
-import org.processmining.framework.plugin.PluginExecutionResult;
-import org.processmining.framework.plugin.PluginParameterBinding;
-import org.processmining.framework.plugin.ProMCanceller;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.framework.util.Pair;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
@@ -54,6 +50,15 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
 
     UIPluginContext context;
 
+    ExperimentGUIRunner runner;
+
+    JButton saveNetButton;
+
+    JEditorPane debugText;
+
+    JButton goButton;
+
+    JProgressBar progressBar;
 
     public AlphaRevisitExperimentsVisualizer(UIPluginContext context, XLog log) {
         this.log = log;
@@ -79,14 +84,14 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
         netVis.setPreferredSize(new Dimension(10000, 10000));
         netVis.setAlignmentX(CENTER_ALIGNMENT);
 
-        JButton saveNetButton = new JButton("Save accepting Petri net in ProM");
+        saveNetButton = new JButton("Save accepting Petri net in ProM");
         saveNetButton.setAlignmentX(CENTER_ALIGNMENT);
         JComboBox viewSelector = SlickerFactory.instance().createComboBox(new String[]{});
         center.add(viewSelector);
         center.add(netVis);
         center.add(saveNetButton);
         add(center, BorderLayout.CENTER);
-        JEditorPane debugText = new JEditorPane("text/html", "");
+        debugText = new JEditorPane("text/html", "");
         debugText.setEditable(false);
         debugText.setFont(new Font("Dialog", Font.PLAIN, 16));
         debugText.setAutoscrolls(false);
@@ -98,9 +103,17 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
         OptionsUI optionsUI = new OptionsUI(true);
         sidePanel.add(optionsUI, BorderLayout.CENTER);
 
-        JButton goButton = new JButton("Mine with selected options");
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new BorderLayout());
+        progressBar = new JProgressBar();
+        progressBar.setIndeterminate(true);
+        progressBar.setVisible(false);
+        goButton = new JButton("Mine with selected options");
         goButton.setPreferredSize(new Dimension(SIDE_PANEL_WIDTH, 50));
-        sidePanel.add(goButton, BorderLayout.SOUTH);
+        goButton.add(progressBar);
+        bottomPanel.add(progressBar, BorderLayout.NORTH);
+        bottomPanel.add(goButton, BorderLayout.CENTER);
+        sidePanel.add(bottomPanel, BorderLayout.SOUTH);
 
         debugText.setText(getDebugText());
         debugText.setCaretPosition(0);
@@ -140,42 +153,24 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
         goButton.addActionListener(e -> {
             this.usedAlgo = optionsUI.getSelectedExperiment();
             context.log("Starting " + this.usedAlgo.name + "...");
-            context.getProgress().setIndeterminate(true);
             if (this.usedAlgo != null) {
                 System.out.println(this.usedAlgo.name + " was selected");
-                ExperimentRunner runner = new ExperimentRunner(this.usedAlgo, context, this.log);
-                long startTime = System.nanoTime();
+                runner = new ExperimentGUIRunner(this.usedAlgo, context, this.log);
+                progressBar.setVisible(true);
+                goButton.setEnabled(false);
                 context.getExecutor().execute(runner);
-                try {
-                    AcceptingPetriNet acceptingPetriNet = runner.get();
-
-                    long duration = System.nanoTime() - startTime;
-                    System.out.println("Algorithm finished; Duration: " + duration);
-                    if (netRes != null && !netRes.isFavorite()) {
-                        this.netRes.destroy();
-                    }
-                    this.net = acceptingPetriNet;
-                    final ProMResource<?> newNetRes = createProMResourceFromAPN(context, this.net, "Accepting Petri net of " + logName + " mined with " + this.usedAlgo.name);
-                    this.netRes = newNetRes;
-                    saveNetButton.setEnabled(true);
-                    createNetVis();
-                    debugText.setText(getDebugText());
-                    debugText.setCaretPosition(0);
-                    revalidate();
-                    repaint();
-                } catch (Exception exception) {
-                    System.err.println("AlphaRevisit Runner interrupted:" + exception.toString());
-                    context.getFutureResult(0).cancel(true);
-                }
             }
         });
     }
 
-
-    private PluginExecutionResult getVisualizationResult(UIPluginContext contextx, ProMCanceller proMCanceller, Pair<Integer, PluginParameterBinding> binding, AcceptingPetriNet net) {
-        PluginParameterBinding parameterBinding = binding.getSecond();
-        List<Class<?>> parameterTypes = parameterBinding.getPlugin().getParameterTypes(parameterBinding.getMethodIndex());
-        return parameterTypes.size() == 2 && parameterTypes.get(1) == ProMCanceller.class ? parameterBinding.invoke(contextx, new Object[]{net, proMCanceller}) : parameterBinding.invoke(contextx, new Object[]{net});
+    @Plugin(name = "Visualize Alpha Revisit Experiments", parameterLabels = {},
+            returnLabels = {"Visualization"},
+            returnTypes = {JComponent.class},
+            userAccessible = true, help = "Try out some experimental algorithms and their options.")
+    @UITopiaVariant(affiliation = "RWTH Aachen University", author = "Aaron Küsters, Wil van der Aalst", email = "aaron.kuesters@rwth-aachen.de")
+    @Visualizer
+    public static JComponent visualize(UIPluginContext context, AlphaRevisitExperimentsVisualizer vis) {
+        return vis;
     }
 
     private void createNetVis() {
@@ -191,17 +186,6 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
         }
     }
 
-
-    @Plugin(name = "Visualize Alpha Revisit Experiments", parameterLabels = {},
-            returnLabels = {"Visualization"},
-            returnTypes = {JComponent.class},
-            userAccessible = true, help = "Try out some experimental algorithms and their options.")
-    @UITopiaVariant(affiliation = "RWTH Aachen University", author = "Aaron Küsters, Wil van der Aalst", email = "aaron.kuesters@rwth-aachen.de")
-    @Visualizer
-    public static JComponent visualize(UIPluginContext context, AlphaRevisitExperimentsVisualizer vis) {
-        return vis;
-    }
-
     private ProMResource createProMResourceFromAPN(UIPluginContext context, AcceptingPetriNet net, String name) {
         context.getProvidedObjectManager().createProvidedObject(name, net,
                 AcceptingPetriNet.class, context);
@@ -212,11 +196,10 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
     private String getDebugText() {
         StringBuilder newDebugText = new StringBuilder();
         if (usedAlgo != null) {
-            newDebugText.append("<h1>" + usedAlgo.name + "</h1>");
+            newDebugText.append("<h1>").append(usedAlgo.name).append("</h1>");
         }
         if (net != null) {
-            newDebugText.append("<h2>Petri net</h2><b>#Places: " + this.net.getNet().getPlaces().size() +
-                    "</b><br/><b>#Arcs: " + this.net.getNet().getEdges().size() + "</b><br/>");
+            newDebugText.append("<h2>Petri net</h2><b>#Places: ").append(this.net.getNet().getPlaces().size()).append("</b><br/><b>#Arcs: ").append(this.net.getNet().getEdges().size()).append("</b><br/>");
         }
         newDebugText.append("<h2>Log</h2><b>Activities:</b><br/>");
         String[] activities = logProcessor.getActivityOccurrences().keySet().toArray(new String[0]);
@@ -228,10 +211,7 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
                 "  </tr>\n");
         for (String act : activities) {
             int count = this.logProcessor.getActivityOccurrence(act);
-            newDebugText.append("  <tr style=\"text-align: center; border-bottom: 1px solid black;\">\n" +
-                    "    <td>" + act + "</td>\n" +
-                    "    <td>" + count + "</td>\n" +
-                    "  </tr>\n");
+            newDebugText.append("  <tr style=\"text-align: center; border-bottom: 1px solid black;\">\n" + "    <td>").append(act).append("</td>\n").append("    <td>").append(count).append("</td>\n").append("  </tr>\n");
 //            newDebugText.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;").append(act).append(": ").append(count).append("<br/>");
         }
         newDebugText.append("</table>\n");
@@ -248,13 +228,58 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
         Arrays.sort(keys, Comparator.comparingInt(e -> -this.logProcessor.getDfg().getOrDefault(e, 0)));
         for (Pair<String, String> key : keys) {
             int value = this.logProcessor.getDfg().getOrDefault(key, 0);
-            newDebugText.append("  <tr style=\"text-align: center; border-bottom: 1px solid black;\">\n" +
-                    "    <td>" + key.getFirst() + " → " + key.getSecond() + "</td>\n" +
-                    "    <td>" + value + "</td>\n" +
-                    "  </tr>\n");
+            newDebugText.append("  <tr style=\"text-align: center; border-bottom: 1px solid black;\">\n" + "    <td>").append(key.getFirst()).append(" → ").append(key.getSecond()).append("</td>\n").append("    <td>").append(value).append("</td>\n").append("  </tr>\n");
 //            newDebugText.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;").append(key.getFirst()).append(" → ").append(key.getSecond()).append(": ").append(value).append("<br/>");
         }
         newDebugText.append("</table>\n");
         return newDebugText.toString();
     }
+
+
+    private class ExperimentGUIRunner extends SwingWorker<AcceptingPetriNet, Void> {
+        private final AlgorithmExperiment experiment;
+        private final UIPluginContext context;
+        private final XLog log;
+
+        public ExperimentGUIRunner(AlgorithmExperiment experiment, UIPluginContext context, XLog log) {
+            this.experiment = experiment;
+            this.context = context;
+            this.log = log;
+        }
+
+        @Override
+        protected AcceptingPetriNet doInBackground() throws Exception {
+            return experiment.execute(context, log);
+        }
+
+        @Override
+        protected void done() {
+            try {
+                AcceptingPetriNet acceptingPetriNet = runner.get();
+                if (netRes != null && !netRes.isFavorite()) {
+                    netRes.destroy();
+                }
+                net = acceptingPetriNet;
+                netRes = (ProMResource<?>) createProMResourceFromAPN(context, net, "Accepting Petri net of " + logName + " mined with " + usedAlgo.name);
+                saveNetButton.setEnabled(true);
+                createNetVis();
+                debugText.setText(getDebugText());
+                debugText.setCaretPosition(0);
+                revalidate();
+                repaint();
+                goButton.setEnabled(true);
+                progressBar.setVisible(false);
+                context.getProgress().cancel();
+                context.getTask().destroy();
+            } catch (Exception exception) {
+                goButton.setEnabled(true);
+                progressBar.setVisible(false);
+                System.err.println("AlphaRevisit Runner interrupted:" + exception);
+                context.getTask().destroy();
+//                    context.getFutureResult(0).cancel(true);
+            }
+        }
+    }
+
+
 }

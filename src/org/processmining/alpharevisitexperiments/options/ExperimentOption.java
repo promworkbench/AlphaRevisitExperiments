@@ -4,11 +4,11 @@ public class ExperimentOption<T extends Comparable<T>> {
     private final String name;
     private final String id;
     private final T startValue;
+    private final Class<T> type;
     private T currentValue;
-
     private T maxValue;
     private T minValue;
-    private Class<T> type;
+
     public ExperimentOption(Class<T> type, String id, String name, T startValue) {
         this.id = id;
         this.name = name;
@@ -18,7 +18,7 @@ public class ExperimentOption<T extends Comparable<T>> {
     }
 
     public ExperimentOption(Class<T> type, String id, String name, T startValue, T minValue, T maxValue) {
-        this(type,id, name, startValue);
+        this(type, id, name, startValue);
         this.minValue = minValue;
         this.maxValue = maxValue;
     }
@@ -39,18 +39,18 @@ public class ExperimentOption<T extends Comparable<T>> {
         return currentValue;
     }
 
-    public Class<T> getType(){
-        return this.type;
-    }
-
     public void setValue(T newVal) {
-        if(minValue != null && newVal.compareTo(minValue) < 0) {
+        if (minValue != null && newVal.compareTo(minValue) < 0) {
             return;
-        }else if(maxValue != null && newVal.compareTo(maxValue) > 0) {
+        } else if (maxValue != null && newVal.compareTo(maxValue) > 0) {
             return;
-        }else {
+        } else {
             currentValue = newVal;
         }
+    }
+
+    public Class<T> getType() {
+        return this.type;
     }
 
     public T getMinValue() {
