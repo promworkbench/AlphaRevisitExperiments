@@ -21,7 +21,7 @@ public class ReplayProcessor {
     };
 
     public static String[] getTopVariants(HashMap<String, Integer> allVariantsWithCaseNumbers, int totalNumberOfCases,
-                                          int goalMinCasePercentage) {
+                                          double goalMinCasePercentage) {
         String[] variantArray = allVariantsWithCaseNumbers.keySet().toArray(new String[0]);
         Arrays.sort(variantArray, Comparator.comparingInt(e -> -allVariantsWithCaseNumbers.getOrDefault(e, 0)));
         int numberOfCoveredCases = 0;
@@ -111,7 +111,7 @@ public class ReplayProcessor {
 //                i.e., the one with the smallest number of violating places
                 for (Marking m : net.getFinalMarkings()) {
                     if (m.contains(p)) {
-                        if (tokenCount.get(p) != 0) {
+                        if (tokenCount.get(p) != 1) {
                             // Violation!
                             Set<Place> violatingPlaces = violatingPlacesPerFinalMarking.getOrDefault(m, new HashSet<>());
                             violatingPlaces.add(p);

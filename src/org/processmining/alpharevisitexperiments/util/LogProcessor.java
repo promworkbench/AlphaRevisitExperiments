@@ -13,11 +13,16 @@ public class LogProcessor {
     public final static String END_ACTIVITY = "__END";
     private final HashMap<Pair<String, String>, Integer> dfg = new HashMap<>();
     private final HashMap<String, Integer> variants = new HashMap<>();
-
     private final HashMap<String, Integer> activityOccurrences = new HashMap<>();
     private final HashSet<String> activities = new HashSet<>();
 
+    private final HashSet<String> firstInCaseActivities = new HashSet<>();
+    private final HashSet<String> lastInCaseActivities = new HashSet<>();
+
+    private final XLog log;
+
     public LogProcessor(XLog log) {
+        this.log = log;
         for (XTrace trace : log) {
             String previousActivity = null;
             String[] currentTrace = new String[trace.size() + 2];
@@ -28,7 +33,11 @@ public class LogProcessor {
             for (int i = 0; i < trace.size(); i++) {
                 String activity = trace.get(i).getAttributes().get("concept:name").toString().replaceAll(",", "_");
                 increaseActivityOccurenceByOne(activity);
-
+                if (i == 0) {
+                    firstInCaseActivities.add(activity);
+                } else if (i == trace.size() - 1) {
+                    lastInCaseActivities.add(activity);
+                }
                 activities.add(activity);
                 currentTrace[i + 1] = activity;
                 Pair<String, String> edge;
@@ -78,4 +87,15 @@ public class LogProcessor {
         return activityOccurrences.getOrDefault(activity, 0);
     }
 
+    public XLog getLog() {
+        return log;
+    }
+
+    public HashSet<String> getFirstInCaseActivities() {
+        return firstInCaseActivities;
+    }
+
+    public HashSet<String> getLastInCaseActivities() {
+        return lastInCaseActivities;
+    }
 }
