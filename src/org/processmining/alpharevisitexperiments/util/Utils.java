@@ -8,6 +8,7 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
 import java.awt.*;
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Utils {
 
@@ -105,6 +106,19 @@ public class Utils {
             }
         }
         return false;
+    }
+
+
+    public static String stringifyCandidates(Set<Pair<Set<String>, Set<String>>> cndSet) {
+        return cndSet.stream().map(c -> stringifyCandidate(c)).sorted().collect(Collectors.joining("\n"));
+    }
+
+    public static String stringifyCandidate(Pair<Set<String>, Set<String>> cnd) {
+        return "(" + sortedStringifySet(cnd.getFirst()) + ", \t" + sortedStringifySet(cnd.getSecond()) + ")";
+    }
+
+    public static String sortedStringifySet(Set<String> set) {
+        return "{" + set.stream().sorted().collect(Collectors.joining(", ")) + "}";
     }
 
 }

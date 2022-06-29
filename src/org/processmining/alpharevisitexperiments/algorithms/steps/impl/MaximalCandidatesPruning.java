@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class MaximalCandidatesPruning extends CandidatePruningStep {
 
-    public final static String NAME = "Select Maximal Candidates Only)";
+    public final static String NAME = "Select Maximal Candidates Only";
     final ExperimentOption[] options = {
     };
 
