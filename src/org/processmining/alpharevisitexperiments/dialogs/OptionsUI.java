@@ -155,28 +155,28 @@ public class OptionsUI extends javax.swing.JPanel {
             switch (selectedPreset) {
                 case "Alpha 1.0":
                     experiment.buildingCandidatesStep = new StandardAlphaCandidateBuilding();
-                    experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new IdentityCandidatePruning(), new MaximalCandidatesPruning(), new IdentityCandidatePruning()};
+                    experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new IdentityCandidatePruning(), new IdentityCandidatePruning(), new MaximalCandidatesPruning()};
                     experiment.buildingNetStep = new StandardAlphaPetriNetBuilding();
                     experiment.postProcessingPetriNetSteps = new PostProcessingPetriNetStep[]{new IdentityNetProcessing()};
                     variantListValueChanged(experiment);
                     return;
                 case "Alpha 1.1":
                     experiment.buildingCandidatesStep = new AlphaOneDotOneCandidateBuilding();
-                    experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new IdentityCandidatePruning(), new MaximalCandidatesPruning(), new IdentityCandidatePruning()};
+                    experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new IdentityCandidatePruning(), new IdentityCandidatePruning(), new MaximalCandidatesPruning()};
                     experiment.buildingNetStep = new AlphaPetriNetBuilding();
                     experiment.postProcessingPetriNetSteps = new PostProcessingPetriNetStep[]{new IdentityNetProcessing()};
                     variantListValueChanged(experiment);
                     return;
                 case "Alpha 2.0":
                     experiment.buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuilding();
-                    experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new IdentityCandidatePruning(), new MaximalCandidatesPruning(), new IdentityCandidatePruning()};
+                    experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new IdentityCandidatePruning(), new IdentityCandidatePruning(), new MaximalCandidatesPruning()};
                     experiment.buildingNetStep = new AlphaPetriNetBuilding();
                     experiment.postProcessingPetriNetSteps = new PostProcessingPetriNetStep[]{new IdentityNetProcessing()};
                     variantListValueChanged(experiment);
                     return;
                 case "Alpha 3.0":
                     experiment.buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuilding();
-                    experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new MaximalCandidatesPruning(), new IdentityCandidatePruning()};
+                    experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new IdentityCandidatePruning(), new MaximalCandidatesPruning()};
                     experiment.buildingNetStep = new AlphaPetriNetBuilding();
                     experiment.postProcessingPetriNetSteps = new PostProcessingPetriNetStep[]{new IdentityNetProcessing()};
                     variantListValueChanged(experiment);
@@ -204,6 +204,7 @@ public class OptionsUI extends javax.swing.JPanel {
                 stepChooser.addItem(StandardAlphaCandidateBuilding.NAME);
                 stepChooser.addItem(AlphaOneDotOneCandidateBuilding.NAME);
                 stepChooser.addItem(AlphaThreeDotZeroCandidateBuilding.NAME);
+//                stepChooser.addItem(AlphaThreeDotZeroCandidateBuildingComplete.NAME);
                 stepChooser.setSelectedItem(step.name);
                 stepChooser.addActionListener(e -> {
                     System.out.println(e);
@@ -214,6 +215,8 @@ public class OptionsUI extends javax.swing.JPanel {
                         experiment.buildingCandidatesStep = new AlphaOneDotOneCandidateBuilding();
                     } else if (selectedItem.equals(StandardAlphaCandidateBuilding.NAME)) {
                         experiment.buildingCandidatesStep = new StandardAlphaCandidateBuilding();
+//                    }else if (selectedItem.equals(AlphaThreeDotZeroCandidateBuildingComplete.NAME)) {
+//                        experiment.buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuildingComplete();
                     }
                     variantListValueChanged(experiment);
                     return;
