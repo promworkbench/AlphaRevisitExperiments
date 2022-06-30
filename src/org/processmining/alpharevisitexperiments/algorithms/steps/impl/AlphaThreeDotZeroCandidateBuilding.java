@@ -40,13 +40,26 @@ public class AlphaThreeDotZeroCandidateBuilding extends CandidateBuildingStep {
 
         Set<Pair<Set<String>, Set<String>>> initialCnd = new HashSet<>();
         Set<Pair<Set<String>, Set<String>>> expandCandidates = new HashSet<>();
-        for (Pair<String, String> el : dfRelation) {
-            if (!dfRelation.contains(new Pair<String, String>(el.getSecond(), el.getFirst()))) {
-                initialCnd.add(new Pair<Set<String>, Set<String>>(new HashSet<>(Collections.singleton(el.getFirst())), new HashSet<>(Collections.singleton(el.getSecond()))));
-            } else {
-                expandCandidates.add(new Pair<Set<String>, Set<String>>(new HashSet<>(Collections.singleton(el.getFirst())), new HashSet<>(Collections.singleton(el.getSecond()))));
+        for (String a : activitiesHat) {
+            for (String b : activitiesHat) {
+                if (dfRelation.contains(new Pair<>(a, b))
+                        && !dfRelation.contains(new Pair<>(b, a))
+                        && !dfRelation.contains(new Pair<>(a, a))
+                        && !dfRelation.contains(new Pair<>(b, b))) {
+                    initialCnd.add(new Pair<Set<String>, Set<String>>(new HashSet<>(Collections.singleton(a)), new HashSet<>(Collections.singleton(b))));
+                } else {
+                    expandCandidates.add(new Pair<Set<String>, Set<String>>(new HashSet<>(Collections.singleton(a)), new HashSet<>(Collections.singleton(b))));
+
+                }
             }
         }
+//        for (Pair<String, String> el : dfRelation) {
+//            if (!dfRelation.contains(new Pair<String, String>(el.getSecond(), el.getFirst()))) {
+//                initialCnd.add(new Pair<Set<String>, Set<String>>(new HashSet<>(Collections.singleton(el.getFirst())), new HashSet<>(Collections.singleton(el.getSecond()))));
+//            } else {
+//                expandCandidates.add(new Pair<Set<String>, Set<String>>(new HashSet<>(Collections.singleton(el.getFirst())), new HashSet<>(Collections.singleton(el.getSecond()))));
+//            }
+//        }
 
 
         System.out.println("Initial TIME" + TimeUnit.SECONDS.convert(System.nanoTime() - lastTimeStart, TimeUnit.NANOSECONDS));
