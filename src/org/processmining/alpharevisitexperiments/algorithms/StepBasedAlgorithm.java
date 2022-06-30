@@ -17,7 +17,7 @@ public class StepBasedAlgorithm extends AlgorithmExperiment {
     final static ExperimentOption[] NO_OPTIONS = {
     };
     public CandidateBuildingStep buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuilding();
-    public CandidatePruningStep[] pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new MaximalCandidatesPruning(), new IdentityCandidatePruning()};
+    public CandidatePruningStep[] pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new IdentityCandidatePruning(), new MaximalCandidatesPruning()};
     public PetriNetBuildingStep buildingNetStep = new AlphaPetriNetBuilding();
     public PostProcessingPetriNetStep[] postProcessingPetriNetSteps = new PostProcessingPetriNetStep[]{new IdentityNetProcessing()};
 
