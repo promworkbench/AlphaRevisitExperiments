@@ -7,6 +7,8 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
 
 import java.awt.*;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,8 +50,12 @@ public class Utils {
     }
 
     public static Transition getTransitionWithLabel(Petrinet net, String label) {
-        Transition t = net.getTransitions().stream().filter((transition -> label.equals(transition.getLabel()))).findAny().get();
-        return t;
+        Optional<Transition> t = net.getTransitions().stream().filter((transition -> label.equals(transition.getLabel()))).findAny();
+        if (t.isPresent()) {
+            return t.get();
+        } else {
+            return null;
+        }
     }
 
     public static boolean isNoDFRelationBetweenSymmetric(Set<Pair<String, String>> dfRelation, Collection<String> as, Collection<String> bs) {
@@ -86,10 +92,53 @@ public class Utils {
     }
 
 
+    public static boolean isFeasibleForA30(Set<Pair<String, String>> dfRelation, Collection<String> as, Collection<String> bs) {
+        if (!areAllRelationsDFBetweenNonStrict(dfRelation, as, bs)) {
+            return false;
+        }
+//            HashSet<String> asWithoutBs = new HashSet<>(as);
+//            asWithoutBs.removeAll(bs);
+//            HashSet<String> bsWithoutAs = new HashSet<>(bs);
+//            bsWithoutAs.removeAll(as);
+
+        Set<String> newAs = new HashSet<>(as);
+        Set<String> newBs = new HashSet<>(bs);
+
+//          Check if (3) is satisfiable
+        for (String a1 : as) {
+            for (String a2 : as) {
+                if (!bs.contains(a2) && dfRelation.contains(new Pair<>(a1, a2))) {
+                    newBs.add(a2);
+                }
+            }
+        }
+//          Check if (4) is satisfiable
+        for (String a1 : bs) {
+            if (!as.contains(a1)) {
+                for (String a2 : bs) {
+                    if (dfRelation.contains(new Pair<>(a1, a2))) {
+                        newAs.add(a1);
+                    }
+                }
+            }
+        }
+//
+//        as.addAll(newAs);
+//        bs.addAll(newBs);
+        //        Check (1)
+        if (areAllRelationsDFBetweenNonStrict(dfRelation, newAs, newBs)) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+
     public static boolean areAllRelationsDFBetweenNonStrict(Set<Pair<String, String>> dfRelation, Collection<String> as, Collection<String> bs) {
         for (String a : as) {
             for (String b : bs) {
-                if (!dfRelation.contains(new Pair<>(a, b))) {
+                if (!dfRelation.contains(new Pair<>(a, b)) && a.indexOf("TAU(") == -1 && b.indexOf("TAU(") == -1) {
                     return false;
                 }
             }

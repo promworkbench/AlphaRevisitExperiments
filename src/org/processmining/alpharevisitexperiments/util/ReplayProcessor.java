@@ -46,6 +46,7 @@ public class ReplayProcessor {
             transitionMap.put(t.getLabel().replaceAll(",", "_"), t);
         }
 
+        Set<Place> placesToRemove = new HashSet<>();
         for (String variant : frequentVariants) {
             System.out.println("- Replaying variant: " + variant);
 
@@ -60,7 +61,6 @@ public class ReplayProcessor {
                 }
             }
 
-            Set<Place> placesToRemove = new HashSet<>();
 
 // Replay trace
             for (String activity : trace) {
@@ -137,26 +137,26 @@ public class ReplayProcessor {
 // Now add all violating places for selected best final marking to the placesToRemove set
             placesToRemove.addAll(violatingPlacesPerFinalMarking.getOrDefault(bestFinalMarking, new HashSet<>()));
 
-// Actually remove places that had missing/remaining tokens
+        }
+        // Actually remove places that had missing/remaining tokens
 // Respecting the doNotRemoveStartEndPlaces option
-            if (doNotRemoveStartEndPlaces) {
-                for (Marking m : net.getFinalMarkings()) {
-                    for (Place p : m) {
-                        placesToRemove.remove(p);
-                    }
-                }
-                for (Place p : net.getInitialMarking()) {
+        if (doNotRemoveStartEndPlaces) {
+            for (Marking m : net.getFinalMarkings()) {
+                for (Place p : m) {
                     placesToRemove.remove(p);
                 }
             }
-
-            for (Place p : placesToRemove) {
-                for (Marking m : net.getFinalMarkings()) {
-                    m.remove(p);
-                }
-                net.getInitialMarking().remove(p);
-                net.getNet().removePlace(p);
+            for (Place p : net.getInitialMarking()) {
+                placesToRemove.remove(p);
             }
+        }
+
+        for (Place p : placesToRemove) {
+            for (Marking m : net.getFinalMarkings()) {
+                m.remove(p);
+            }
+            net.getInitialMarking().remove(p);
+            net.getNet().removePlace(p);
         }
     }
 }

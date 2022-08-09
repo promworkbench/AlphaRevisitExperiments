@@ -145,6 +145,9 @@ public class OptionsUI extends javax.swing.JPanel {
         presetChooser.addItem("Alpha 1.1");
         presetChooser.addItem("Alpha 2.0");
         presetChooser.addItem("Alpha 3.0");
+        presetChooser.addItem("Alpha 3.0T");
+        presetChooser.addItem("Alpha 3.0SM");
+        presetChooser.addItem("Alpha 3.0EXP");
 
         presetChooser.setMaximumSize(presetChooser.getPreferredSize());
         JLabel presetChooserLabel = new JLabel("Apply a Preset:");
@@ -181,6 +184,27 @@ public class OptionsUI extends javax.swing.JPanel {
                     experiment.postProcessingPetriNetSteps = new PostProcessingPetriNetStep[]{new IdentityNetProcessing()};
                     variantListValueChanged(experiment);
                     return;
+                case "Alpha 3.0T":
+                    experiment.buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuilding();
+                    experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new CandidateTraceFittingFilter(), new MaximalCandidatesPruning()};
+                    experiment.buildingNetStep = new AlphaPetriNetBuilding();
+                    experiment.postProcessingPetriNetSteps = new PostProcessingPetriNetStep[]{new IdentityNetProcessing()};
+                    variantListValueChanged(experiment);
+                    return;
+                case "Alpha 3.0SM":
+                    experiment.buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuilding();
+                    experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new CandidateTraceFittingFilter(), new ScoredMaximalCandidatesPruning()};
+                    experiment.buildingNetStep = new AlphaPetriNetBuilding();
+                    experiment.postProcessingPetriNetSteps = new PostProcessingPetriNetStep[]{new IdentityNetProcessing()};
+                    variantListValueChanged(experiment);
+                    return;
+                case "Alpha 3.0EXP":
+                    experiment.buildingCandidatesStep = new AlphaThreeDotZeroExperimentalCandidateBuilding();
+                    experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new IdentityCandidatePruning(), new MaximalCandidatesPruning()};
+                    experiment.buildingNetStep = new ExperimentalPetriNetBuilding();
+                    experiment.postProcessingPetriNetSteps = new PostProcessingPetriNetStep[]{new IdentityNetProcessing()};
+                    variantListValueChanged(experiment);
+                    return;
             }
         });
         presetPanel.setOpaque(false);
@@ -204,7 +228,7 @@ public class OptionsUI extends javax.swing.JPanel {
                 stepChooser.addItem(StandardAlphaCandidateBuilding.NAME);
                 stepChooser.addItem(AlphaOneDotOneCandidateBuilding.NAME);
                 stepChooser.addItem(AlphaThreeDotZeroCandidateBuilding.NAME);
-//                stepChooser.addItem(AlphaThreeDotZeroCandidateBuildingComplete.NAME);
+                stepChooser.addItem(AlphaThreeDotZeroExperimentalCandidateBuilding.NAME);
                 stepChooser.setSelectedItem(step.name);
                 stepChooser.addActionListener(e -> {
                     System.out.println(e);
@@ -215,8 +239,8 @@ public class OptionsUI extends javax.swing.JPanel {
                         experiment.buildingCandidatesStep = new AlphaOneDotOneCandidateBuilding();
                     } else if (selectedItem.equals(StandardAlphaCandidateBuilding.NAME)) {
                         experiment.buildingCandidatesStep = new StandardAlphaCandidateBuilding();
-//                    }else if (selectedItem.equals(AlphaThreeDotZeroCandidateBuildingComplete.NAME)) {
-//                        experiment.buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuildingComplete();
+                    } else if (selectedItem.equals(AlphaThreeDotZeroExperimentalCandidateBuilding.NAME)) {
+                        experiment.buildingCandidatesStep = new AlphaThreeDotZeroExperimentalCandidateBuilding();
                     }
                     variantListValueChanged(experiment);
                     return;
@@ -225,6 +249,8 @@ public class OptionsUI extends javax.swing.JPanel {
                 stepChooser.addItem(IdentityCandidatePruning.NAME);
                 stepChooser.addItem(BalanceBasedCandidatePruning.NAME);
                 stepChooser.addItem(MaximalCandidatesPruning.NAME);
+                stepChooser.addItem(CandidateTraceFittingFilter.NAME);
+                stepChooser.addItem(ScoredMaximalCandidatesPruning.NAME);
                 stepChooser.setSelectedItem(step.name);
                 stepChooser.addActionListener(e -> {
                     System.out.println(e);
@@ -237,6 +263,10 @@ public class OptionsUI extends javax.swing.JPanel {
                                 experiment.pruningCandidatesSteps[j] = new BalanceBasedCandidatePruning();
                             } else if (selectedItem.equals(MaximalCandidatesPruning.NAME)) {
                                 experiment.pruningCandidatesSteps[j] = new MaximalCandidatesPruning();
+                            } else if (selectedItem.equals(CandidateTraceFittingFilter.NAME)) {
+                                experiment.pruningCandidatesSteps[j] = new CandidateTraceFittingFilter();
+                            } else if (selectedItem.equals(ScoredMaximalCandidatesPruning.NAME)) {
+                                experiment.pruningCandidatesSteps[j] = new ScoredMaximalCandidatesPruning();
                             }
                         }
                     }
@@ -247,6 +277,7 @@ public class OptionsUI extends javax.swing.JPanel {
             } else if (step instanceof PetriNetBuildingStep) {
                 stepChooser.addItem(StandardAlphaPetriNetBuilding.NAME);
                 stepChooser.addItem(AlphaPetriNetBuilding.NAME);
+                stepChooser.addItem(ExperimentalPetriNetBuilding.NAME);
                 stepChooser.setSelectedItem(step.name);
                 stepChooser.addActionListener(e -> {
                     System.out.println(e);
@@ -255,6 +286,8 @@ public class OptionsUI extends javax.swing.JPanel {
                         experiment.buildingNetStep = new AlphaPetriNetBuilding();
                     } else if (selectedItem.equals(StandardAlphaPetriNetBuilding.NAME)) {
                         experiment.buildingNetStep = new StandardAlphaPetriNetBuilding();
+                    } else if (selectedItem.equals(ExperimentalPetriNetBuilding.NAME)) {
+                        experiment.buildingNetStep = new ExperimentalPetriNetBuilding();
                     }
                     variantListValueChanged(experiment);
                     return;
