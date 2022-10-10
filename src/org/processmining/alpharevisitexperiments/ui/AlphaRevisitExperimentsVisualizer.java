@@ -195,7 +195,7 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
             context.log("Starting " + this.usedAlgo.name + "...");
             if (this.usedAlgo != null) {
                 System.out.println(this.usedAlgo.name + " was selected");
-                runner = new ExperimentGUIRunner(this.usedAlgo, context, this.logProcessor);
+                runner = new ExperimentGUIRunner(this.usedAlgo, context, logProcessor);
                 progressBar.setVisible(true);
                 goButton.setEnabled(false);
                 context.getExecutor().execute(runner);
@@ -232,7 +232,7 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
     private String getDebugText() {
         StringBuilder newDebugText = new StringBuilder();
         if (net != null) {
-            newDebugText.append("<h2>Petri net</h2><b>#Places: ").append(this.net.getNet().getPlaces().size()).append("</b><br/><b>#Arcs: ").append(this.net.getNet().getEdges().size()).append("</b><br/>");
+            newDebugText.append("<h2>Petri net</h2><b>#Places: ").append(this.net.getNet().getPlaces().size()).append("</b><br/><b>#Arcs: ").append(this.net.getNet().getEdges().size()).append("</b><br/><b>#Transitions: ").append(this.net.getNet().getTransitions().size()).append("<br/>");
         }
         newDebugText.append("<h2>Log</h2><b>Activities:</b><br/>");
         String[] activities = logProcessor.getActivityOccurrences().keySet().toArray(new String[0]);

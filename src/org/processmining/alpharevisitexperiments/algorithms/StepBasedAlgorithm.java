@@ -16,6 +16,7 @@ import java.util.Set;
 public class StepBasedAlgorithm extends AlgorithmExperiment {
     final static ExperimentOption[] NO_OPTIONS = {
     };
+    public LogRepairStep[] logRepairSteps = new LogRepairStep[]{new IdentityLogRepair()};
     public CandidateBuildingStep buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuilding();
     public CandidatePruningStep[] pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new IdentityCandidatePruning(), new MaximalCandidatesPruning()};
     public PetriNetBuildingStep buildingNetStep = new AlphaPetriNetBuilding();
@@ -29,8 +30,12 @@ public class StepBasedAlgorithm extends AlgorithmExperiment {
     }
 
     @Override
-    public AcceptingPetriNet execute(UIPluginContext context, LogProcessor logProcessor) {
+    public AcceptingPetriNet execute(UIPluginContext context, LogProcessor initialLogProcessor) {
         int stepNum = 0;
+        LogProcessor logProcessor = initialLogProcessor;
+        for (LogRepairStep logRepairStep : logRepairSteps) {
+            logProcessor = logRepairStep.repairLog(context, logProcessor);
+        }
         Set<Pair<Set<String>, Set<String>>> candidates = buildingCandidatesStep.buildCandidates(context, logProcessor);
         candidateCountAfterStep.put(stepNum++, candidates.size());
         for (CandidatePruningStep pruningStep : pruningCandidatesSteps) {
@@ -57,6 +62,9 @@ public class StepBasedAlgorithm extends AlgorithmExperiment {
 
     public Step[] getAllSteps() {
         ArrayList<Step> allSteps = new ArrayList<>();
+        for (Step step : this.logRepairSteps) {
+            allSteps.add(step);
+        }
         allSteps.add(this.buildingCandidatesStep);
         for (Step step : this.pruningCandidatesSteps) {
             allSteps.add(step);

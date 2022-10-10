@@ -8,7 +8,8 @@ public abstract class Step {
 
     public final String name;
 
-    private ExperimentOption[] options;
+    private ExperimentOption[] options = {
+    };
 
     protected Step(String name) {
         this.name = name;

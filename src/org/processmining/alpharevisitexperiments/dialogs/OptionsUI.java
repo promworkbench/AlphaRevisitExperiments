@@ -157,6 +157,7 @@ public class OptionsUI extends javax.swing.JPanel {
             String selectedPreset = presetChooser.getSelectedItem().toString();
             switch (selectedPreset) {
                 case "Alpha 1.0":
+                    experiment.logRepairSteps = new LogRepairStep[]{new IdentityLogRepair()};
                     experiment.buildingCandidatesStep = new StandardAlphaCandidateBuilding();
                     experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new IdentityCandidatePruning(), new IdentityCandidatePruning(), new MaximalCandidatesPruning()};
                     experiment.buildingNetStep = new StandardAlphaPetriNetBuilding();
@@ -164,6 +165,7 @@ public class OptionsUI extends javax.swing.JPanel {
                     variantListValueChanged(experiment);
                     return;
                 case "Alpha 1.1":
+                    experiment.logRepairSteps = new LogRepairStep[]{new IdentityLogRepair()};
                     experiment.buildingCandidatesStep = new AlphaOneDotOneCandidateBuilding();
                     experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new IdentityCandidatePruning(), new IdentityCandidatePruning(), new MaximalCandidatesPruning()};
                     experiment.buildingNetStep = new AlphaPetriNetBuilding();
@@ -171,6 +173,7 @@ public class OptionsUI extends javax.swing.JPanel {
                     variantListValueChanged(experiment);
                     return;
                 case "Alpha 2.0":
+                    experiment.logRepairSteps = new LogRepairStep[]{new IdentityLogRepair()};
                     experiment.buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuilding();
                     experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new IdentityCandidatePruning(), new IdentityCandidatePruning(), new MaximalCandidatesPruning()};
                     experiment.buildingNetStep = new AlphaPetriNetBuilding();
@@ -178,6 +181,7 @@ public class OptionsUI extends javax.swing.JPanel {
                     variantListValueChanged(experiment);
                     return;
                 case "Alpha 3.0":
+                    experiment.logRepairSteps = new LogRepairStep[]{new IdentityLogRepair()};
                     experiment.buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuilding();
                     experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new IdentityCandidatePruning(), new MaximalCandidatesPruning()};
                     experiment.buildingNetStep = new AlphaPetriNetBuilding();
@@ -185,6 +189,7 @@ public class OptionsUI extends javax.swing.JPanel {
                     variantListValueChanged(experiment);
                     return;
                 case "Alpha 3.0T":
+                    experiment.logRepairSteps = new LogRepairStep[]{new IdentityLogRepair()};
                     experiment.buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuilding();
                     experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new CandidateTraceFittingFilter(), new MaximalCandidatesPruning()};
                     experiment.buildingNetStep = new AlphaPetriNetBuilding();
@@ -192,6 +197,7 @@ public class OptionsUI extends javax.swing.JPanel {
                     variantListValueChanged(experiment);
                     return;
                 case "Alpha 3.0SM":
+                    experiment.logRepairSteps = new LogRepairStep[]{new IdentityLogRepair()};
                     experiment.buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuilding();
                     experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new CandidateTraceFittingFilter(), new ScoredMaximalCandidatesPruning()};
                     experiment.buildingNetStep = new AlphaPetriNetBuilding();
@@ -199,6 +205,7 @@ public class OptionsUI extends javax.swing.JPanel {
                     variantListValueChanged(experiment);
                     return;
                 case "Alpha 3.0EXP":
+                    experiment.logRepairSteps = new LogRepairStep[]{new IdentityLogRepair()};
                     experiment.buildingCandidatesStep = new AlphaThreeDotZeroExperimentalCandidateBuilding();
                     experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new IdentityCandidatePruning(), new MaximalCandidatesPruning()};
                     experiment.buildingNetStep = new ExperimentalPetriNetBuilding();
@@ -224,7 +231,26 @@ public class OptionsUI extends javax.swing.JPanel {
             stepChooser.setBackground(Color.WHITE);
             stepChooser.setFont(new Font("Dialog", Font.BOLD, 14));
             stepChooser.setToolTipText("Change step");
-            if (step instanceof CandidateBuildingStep) {
+            if (step instanceof LogRepairStep) {
+                stepChooser.addItem(IdentityLogRepair.NAME);
+                stepChooser.addItem(NamedTauLogRepair.NAME);
+                stepChooser.setSelectedItem(step.name);
+                stepChooser.addActionListener(e -> {
+                    System.out.println(e);
+                    String selectedItem = stepChooser.getSelectedItem().toString();
+                    for (int j = 0; j < experiment.logRepairSteps.length; j++) {
+                        if (experiment.logRepairSteps[j] == step) {
+                            if (selectedItem.equals(IdentityLogRepair.NAME)) {
+                                experiment.logRepairSteps[j] = new IdentityLogRepair();
+                            } else if (selectedItem.equals(NamedTauLogRepair.NAME)) {
+                                experiment.logRepairSteps[j] = new NamedTauLogRepair();
+                            }
+                        }
+                    }
+                    variantListValueChanged(experiment);
+                    return;
+                });
+            } else if (step instanceof CandidateBuildingStep) {
                 stepChooser.addItem(StandardAlphaCandidateBuilding.NAME);
                 stepChooser.addItem(AlphaOneDotOneCandidateBuilding.NAME);
                 stepChooser.addItem(AlphaThreeDotZeroCandidateBuilding.NAME);

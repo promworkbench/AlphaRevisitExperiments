@@ -11,10 +11,10 @@ public class LogProcessor {
 
     public final static String START_ACTIVITY = "__START";
     public final static String END_ACTIVITY = "__END";
-    private final HashMap<Pair<String, String>, Integer> dfg = new HashMap<>();
-    private final HashMap<String, Integer> variants = new HashMap<>();
-    private final HashMap<String, Integer> activityOccurrences = new HashMap<>();
-    private final HashSet<String> activities = new HashSet<>();
+    private HashMap<Pair<String, String>, Integer> dfg = new HashMap<>();
+    private HashMap<String, Integer> variants = new HashMap<>();
+    private HashMap<String, Integer> activityOccurrences = new HashMap<>();
+    private HashSet<String> activities = new HashSet<>();
 
     private final HashSet<String> firstInCaseActivities = new HashSet<>();
     private final HashSet<String> lastInCaseActivities = new HashSet<>();
@@ -74,6 +74,24 @@ public class LogProcessor {
     public HashMap<String, Integer> getVariants() {
         return variants;
     }
+
+    public void setVariants(HashMap<String, Integer> newVariants) {
+        this.variants = newVariants;
+    }
+
+    public void setActivities(HashSet<String> newActivities) {
+        this.activities = newActivities;
+    }
+
+    public void setDfg(HashMap<Pair<String, String>, Integer> newDfg) {
+        this.dfg = newDfg;
+    }
+
+
+    public void setActivityOccurrences(HashMap<String, Integer> newActivityOccurrences) {
+        this.activityOccurrences = newActivityOccurrences;
+    }
+
 
     public HashSet<String> getActivities() {
         return activities;

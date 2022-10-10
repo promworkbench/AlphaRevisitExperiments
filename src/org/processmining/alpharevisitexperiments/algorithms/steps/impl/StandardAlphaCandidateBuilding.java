@@ -55,7 +55,7 @@ public class StandardAlphaCandidateBuilding extends CandidateBuildingStep {
             for (int j = i + 1; j < cnd.size(); j++) {
                 if (cnd.get(i) != cnd.get(j)) {
                     Set<String> a1 = cnd.get(i).getFirst(), a2 = cnd.get(i).getSecond(), b1 = cnd.get(j).getFirst(), b2 = cnd.get(j).getSecond();
-//                    Size comparison to short-circuit combinations that do not event fit wrt. size
+//                    Size comparison to short-circuit combinations that do not even fit wrt. size
                     if ((a1.size() >= b1.size() && a1.containsAll(b1)) || (a2.size() >= b2.size() && a2.containsAll(b2))) {
                         if (Utils.isNoDFRelationBetweenSymmetric(dfRelation, a1, b1) && Utils.isNoDFRelationBetweenSymmetric(dfRelation, a2, b2)) {
                             HashSet<String> first = new HashSet<>(a1);
