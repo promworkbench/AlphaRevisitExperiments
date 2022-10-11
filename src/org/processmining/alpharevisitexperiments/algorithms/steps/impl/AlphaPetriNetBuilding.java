@@ -50,7 +50,10 @@ public class AlphaPetriNetBuilding extends PetriNetBuildingStep {
             }
         }
         for (String activity : logProcessor.getActivities()) {
-            net.addTransition(activity);
+            Transition t = net.addTransition(activity);
+            if (activity.startsWith("skip_")) {
+                t.setInvisible(true);
+            }
         }
 
         for (Pair<Set<String>, Set<String>> e : candidates) {

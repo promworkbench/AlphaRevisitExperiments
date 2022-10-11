@@ -24,9 +24,9 @@ public class NamedTauLogRepair extends LogRepairStep {
     }
 
     @Override
-    public LogProcessor repairLog(UIPluginContext context, LogProcessor oldLogProcessor) {
-        LogProcessor logProcessor = new LogProcessor(oldLogProcessor.getLog()); // TODO: Change this. Make a way to create a copy of a log processor based on processed data. This will cause problems as soon as multiple consecutive Repair steps are possible.
+    public LogProcessor repairLog(UIPluginContext context, LogProcessor logProcessor) {
         HashMap<Pair<String, String>, Integer> dfg = logProcessor.getDfg();
+        HashSet<String> newNamedTauActivities = new HashSet<>();
         for (String a : logProcessor.getActivities()) {
             for (String b : logProcessor.getActivities()) {
                 if (dfg.getOrDefault(new Pair<>(a, b), 0) > 0
@@ -74,8 +74,7 @@ public class NamedTauLogRepair extends LogRepairStep {
                         dfg.put(new Pair<>(a, newNamedTau), dfCountFromAToOther);
 
                         logProcessor.setDfg(dfg);
-
-                        logProcessor.getActivities().add(newNamedTau);
+                        newNamedTauActivities.add(newNamedTau);
                         logProcessor.getActivityOccurrences().put(newNamedTau, dfCountFromAToOther);
 
 //                        initialCnd.add(new Pair<Set<String>, Set<String>>(new HashSet<>(Collections.singleton(a)), new HashSet<>(bWithTau)));
@@ -85,6 +84,9 @@ public class NamedTauLogRepair extends LogRepairStep {
                     }
                 }
             }
+        }
+        for (String newNamedTauAct : newNamedTauActivities) {
+            logProcessor.getActivities().add(newNamedTauAct);
         }
         return logProcessor;
 

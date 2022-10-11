@@ -194,8 +194,9 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
             this.usedAlgo = optionsUI.getSelectedExperiment();
             context.log("Starting " + this.usedAlgo.name + "...");
             if (this.usedAlgo != null) {
+                LogProcessor logProcessorToUse = new LogProcessor(log);
                 System.out.println(this.usedAlgo.name + " was selected");
-                runner = new ExperimentGUIRunner(this.usedAlgo, context, logProcessor);
+                runner = new ExperimentGUIRunner(this.usedAlgo, context, logProcessorToUse);
                 progressBar.setVisible(true);
                 goButton.setEnabled(false);
                 context.getExecutor().execute(runner);
@@ -412,6 +413,7 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
             } catch (Exception exception) {
                 goButton.setEnabled(true);
                 progressBar.setVisible(false);
+                exception.printStackTrace();
                 System.err.println("AlphaRevisit Runner interrupted:" + exception);
                 context.getTask().destroy();
 //                    context.getFutureResult(0).cancel(true);
