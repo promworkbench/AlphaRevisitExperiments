@@ -28,60 +28,61 @@ public class NamedTauLogRepair extends LogRepairStep {
         HashMap<Pair<String, String>, Integer> dfg = logProcessor.getDfg();
         HashSet<String> newNamedTauActivities = new HashSet<>();
         for (String a : logProcessor.getActivities()) {
-            for (String b : logProcessor.getActivities()) {
-                if (dfg.getOrDefault(new Pair<>(a, b), 0) > 0
-                        && dfg.getOrDefault(new Pair<>(b, a), 0) <= 0
-                        && dfg.getOrDefault(new Pair<>(a, a), 0) <= 0
-                        && dfg.getOrDefault(new Pair<>(b, b), 0) <= 0) {
-
-                    Set<String> outgoingFromA = dfg.keySet().stream().filter(r -> r.getFirst().equals(a)).map(r -> r.getSecond()).collect(Collectors.toSet());
-                    Set<String> outgoingFromB = dfg.keySet().stream().filter(r -> r.getFirst().equals(b)).map(r -> r.getSecond()).collect(Collectors.toSet());
-                    if (outgoingFromA.containsAll(outgoingFromB)) {
-//                        b seems to be optional?
-
-// Update variants and DF
-                        String newNamedTau = "skip_" + b;
-                        assert !logProcessor.getActivities().contains(newNamedTau);
-                        HashMap<String, Integer> variantsBefore = logProcessor.getVariants();
-                        HashMap<String, Integer> variantsAfter = new HashMap<>();
-                        for (String variant : variantsBefore.keySet()) {
-                            String[] variantSplit = variant.split(",");
-                            ArrayList<String> newVariantSplit = new ArrayList<>();
-                            for (int i = 0; i < variantSplit.length; i++) {
-                                newVariantSplit.add(variantSplit[i]);
-                                if (variantSplit[i].equals(a) && i < variantSplit.length && !variantSplit[i + 1].equals(b)) {
-                                    newVariantSplit.add(newNamedTau);
-                                }
+            if (!dfg.containsKey(new Pair<>(a, a))) {
+                Set<String> outgoingFromA = dfg.keySet().stream().filter(r -> r.getFirst().equals(a)).map(r -> r.getSecond()).collect(Collectors.toSet());
+                Set<String> canSkip = new HashSet<>();
+                for (Pair<String, String> df : dfg.keySet()) {
+                    if (df.getFirst().equals(a) && !df.getSecond().equals(a) && logProcessor.getActivities().contains(df.getSecond())) {
+                        String b = df.getSecond();
+                        if (!dfg.containsKey(new Pair<>(b, b)) && !dfg.containsKey(new Pair<>(b, a))) {
+                            Set<String> outgoingFromB = dfg.keySet().stream().filter(r -> r.getFirst().equals(b)).map(r -> r.getSecond()).collect(Collectors.toSet());
+                            if (outgoingFromA.containsAll(outgoingFromB)) {
+                                canSkip.add(b);
                             }
-                            variantsAfter.put(String.join(",", newVariantSplit), variantsBefore.get(variant));
+
+
                         }
 
-                        logProcessor.setVariants(variantsAfter);
-
-                        int dfCountFromAToOther = 0;
-                        Set<Pair<String, String>> dfstoDelete = new HashSet<>();
-                        for (Pair<String, String> df : dfg.keySet()) {
-                            if (df.getFirst().equals(a) && !df.getSecond().equals(b)) {
-                                dfCountFromAToOther += dfg.get(df);
-                                dfstoDelete.add(df);
-                            }
-                        }
-
-                        for (Pair<String, String> df : dfstoDelete) {
-                            dfg.put(new Pair<>(newNamedTau, df.getSecond()), dfg.get(df));
-                            dfg.remove(df);
-                        }
-                        dfg.put(new Pair<>(a, newNamedTau), dfCountFromAToOther);
-
-                        logProcessor.setDfg(dfg);
-                        newNamedTauActivities.add(newNamedTau);
-                        logProcessor.getActivityOccurrences().put(newNamedTau, dfCountFromAToOther);
-
-//                        initialCnd.add(new Pair<Set<String>, Set<String>>(new HashSet<>(Collections.singleton(a)), new HashSet<>(bWithTau)));
-//                        for (String out : outgoingFromB) {
-//                            initialCnd.add(new Pair<Set<String>, Set<String>>(new HashSet<>(bWithTau), new HashSet<>(Collections.singleton(out))));
-//                        }
                     }
+                }
+// Update variants and DF
+                if (canSkip.size() > 0) {
+                    String newNamedTau = "skip_after_" + a;
+                    assert !logProcessor.getActivities().contains(newNamedTau);
+                    HashMap<String, Integer> variantsBefore = logProcessor.getVariants();
+                    HashMap<String, Integer> variantsAfter = new HashMap<>();
+                    for (String variant : variantsBefore.keySet()) {
+                        String[] variantSplit = variant.split(",");
+                        ArrayList<String> newVariantSplit = new ArrayList<>();
+                        for (int i = 0; i < variantSplit.length; i++) {
+                            newVariantSplit.add(variantSplit[i]);
+                            if (variantSplit[i].equals(a) && i + 1 < variantSplit.length && !canSkip.contains(variantSplit[i + 1])) {
+                                newVariantSplit.add(newNamedTau);
+                            }
+                        }
+                        variantsAfter.put(String.join(",", newVariantSplit), variantsBefore.get(variant));
+                    }
+
+                    logProcessor.setVariants(variantsAfter);
+
+                    int dfCountFromAToOther = 0;
+                    Set<Pair<String, String>> dfstoDelete = new HashSet<>();
+                    for (Pair<String, String> df : dfg.keySet()) {
+                        if (df.getFirst().equals(a) && !canSkip.contains(df.getSecond())) {
+                            dfCountFromAToOther += dfg.get(df);
+                            dfstoDelete.add(df);
+                        }
+                    }
+
+                    for (Pair<String, String> df : dfstoDelete) {
+                        dfg.put(new Pair<>(newNamedTau, df.getSecond()), dfg.get(df));
+                        dfg.remove(df);
+                    }
+                    dfg.put(new Pair<>(a, newNamedTau), dfCountFromAToOther);
+
+                    logProcessor.setDfg(dfg);
+                    newNamedTauActivities.add(newNamedTau);
+                    logProcessor.getActivityOccurrences().put(newNamedTau, dfCountFromAToOther);
                 }
             }
         }

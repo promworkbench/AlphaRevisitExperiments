@@ -25,7 +25,7 @@ public class ReplayNetPostProcessing extends PostProcessingPetriNetStep {
 
     @Override
     public AcceptingPetriNet processPetriNet(UIPluginContext context, LogProcessor logProcessor, AcceptingPetriNet net) {
-        String[] frequentVariants = ReplayProcessor.getTopVariants(logProcessor.getVariants(), logProcessor.getLog().size(), this.getOptionValueByID(FREQUENT_VARIANT_OPTION_ID));
+        String[] frequentVariants = ReplayProcessor.getTopVariants(logProcessor.getVariants(), logProcessor.getNumberOfCases(), this.getOptionValueByID(FREQUENT_VARIANT_OPTION_ID));
         ReplayProcessor.replayAndRemovePlaces(net, frequentVariants, this.getOptionValueByID(DO_NOT_REMOVE_STARTEND_PLACES_OPTION_ID));
         return net;
     }

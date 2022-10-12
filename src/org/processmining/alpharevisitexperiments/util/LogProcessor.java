@@ -21,8 +21,11 @@ public class LogProcessor {
 
     private final XLog log;
 
+    private int numberOfCases = 0;
+
     public LogProcessor(XLog log) {
         this.log = log;
+        this.numberOfCases = log.size();
         for (XTrace trace : log) {
             String previousActivity = null;
             String[] currentTrace = new String[trace.size() + 2];
@@ -87,6 +90,14 @@ public class LogProcessor {
         this.dfg = newDfg;
     }
 
+
+    public int getNumberOfCases() {
+        return numberOfCases;
+    }
+
+    public void setNumberOfCases(int numberOfCases) {
+        this.numberOfCases = numberOfCases;
+    }
 
     public void setActivityOccurrences(HashMap<String, Integer> newActivityOccurrences) {
         this.activityOccurrences = newActivityOccurrences;

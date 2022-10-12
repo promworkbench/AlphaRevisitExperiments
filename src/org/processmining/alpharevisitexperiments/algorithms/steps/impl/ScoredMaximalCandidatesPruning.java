@@ -65,7 +65,7 @@ public class ScoredMaximalCandidatesPruning extends CandidatePruningStep {
                 fittingTraces += weight;
             }
         }
-        return ((double) fittingTraces) / (logProcessor.getLog().size());
+        return ((double) fittingTraces) / (logProcessor.getNumberOfCases());
     }
 
     @Override
