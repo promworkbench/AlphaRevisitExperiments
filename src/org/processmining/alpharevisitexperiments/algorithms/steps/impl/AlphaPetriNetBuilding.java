@@ -15,6 +15,7 @@ import org.processmining.models.graphbased.directed.petrinet.impl.PetrinetFactor
 import org.processmining.models.semantics.petrinet.Marking;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -71,6 +72,15 @@ public class AlphaPetriNetBuilding extends PetriNetBuildingStep {
                     net.addArc(from, to);
                 }
             }
+        }
+        Set<Transition> transitionsToRemove = new HashSet<>();
+        for (Transition t : net.getTransitions()) {
+            if (t.isInvisible() && net.getInEdges(t).size() == 0 && net.getOutEdges(t).size() == 0) {
+                transitionsToRemove.add(t);
+            }
+        }
+        for (Transition t : transitionsToRemove) {
+            net.removeTransition(t);
         }
         System.out.println("Done building Petri net");
         return AcceptingPetriNetFactory.createAcceptingPetriNet(net, initialMarking, finalMarking);

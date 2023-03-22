@@ -12,12 +12,9 @@ import java.util.*;
 
 public class ReplayProcessor {
 
-    public final static String FREQUENT_VARIANT_OPTION_ID = "replay_frequent_variants";
-    public final static String DO_NOT_REMOVE_STARTEND_PLACES_OPTION_ID = "do_not_remove_startend_places";
+    public final static String FREQUENT_VARIANT_OPTION_ID = "replay_local_fitness_required";
     public final static ExperimentOption[] STANDARD_REPLAY_OPTIONS = {
-            new ExperimentOption<>(Integer.class, FREQUENT_VARIANT_OPTION_ID, "Cover this percentage of all traces with the frequent variants used for replay and place removal", 0, 0, 100),
-            new ExperimentOption<>(Boolean.class, DO_NOT_REMOVE_STARTEND_PLACES_OPTION_ID, "Do not remove places that part of a start or end marking.", false),
-//            new ExperimentOption<>(Boolean.class,"try_connect","Try to connect disconnected transitions",false),
+            new ExperimentOption<>(Double.class, FREQUENT_VARIANT_OPTION_ID, "replay_local_fitness_required", 0.0, 0.0, 1.0),
     };
 
     public static String[] getTopVariants(HashMap<String, Integer> allVariantsWithCaseNumbers, int totalNumberOfCases,
@@ -38,6 +35,132 @@ public class ReplayProcessor {
 
     public static void replayAndRemovePlaces(AcceptingPetriNet net, String[] frequentVariants) {
         replayAndRemovePlaces(net, frequentVariants, false);
+    }
+
+    public static Map<Place, Double> replayWithAllTraces(AcceptingPetriNet net, Map<String, Integer> allTracesWithFrequency) {
+        HashMap<String, Transition> transitionMap = new HashMap<>();
+        for (Transition t : net.getNet().getTransitions()) {
+            transitionMap.put(t.getLabel().replaceAll(",", "_"), t);
+        }
+
+//        Set<Place> placesToRemove = new HashSet<>();
+        Map<Place, Integer> numberOfFittingTracesPerPlace = new HashMap<>();
+        Map<Place, Integer> numberOfRelevantTracesPerPlace = new HashMap<>();
+
+        for (String variant : allTracesWithFrequency.keySet()) {
+            Set<Place> violatingPlaces = new HashSet<>();
+            Set<Place> relevantPlaces = new HashSet<>();
+            HashMap<Place, Integer> tokenCount = new HashMap<>();
+            String[] trace = variant.split(",");
+// Place initial tokens
+            for (Place p : net.getNet().getPlaces()) {
+                if (net.getInitialMarking().contains(p)) {
+                    tokenCount.put(p, 1);
+                } else {
+                    tokenCount.put(p, 0);
+                }
+            }
+
+
+// Replay trace
+            for (String activity : trace) {
+// Check if incoming places have sufficient token
+// Get every place with an arc to the corresponding (fired) transition
+                for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> e : net.getNet()
+                        .getInEdges(transitionMap.get(activity))) {
+                    PetrinetNode incomingNode = e.getSource();
+                    if (incomingNode instanceof Place) {
+                        Place p = (Place) incomingNode;
+                        relevantPlaces.add(p);
+// Decrease the token count in that place by 1
+                        int count = tokenCount.get(p);
+                        if (count > 0) {
+                            count -= 1;
+                            tokenCount.put(p, count);
+                        } else {
+// If there is no token in the place, it should be removed
+//                            System.out.println("No token in place" + p.getLabel() + " -> remove place");
+                            violatingPlaces.add(p);
+                        }
+                    } else {
+                        System.err.println("Error: Incoming PN node for transition is not a place?!");
+                    }
+                }
+// Place tokens in outgoing places
+// Get every place with an arc incoming from the fired transition
+                for (PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> e : net.getNet()
+                        .getOutEdges(transitionMap.get(activity))) {
+                    PetrinetNode outgoingNode = e.getTarget();
+                    if (outgoingNode instanceof Place) {
+                        Place p = (Place) outgoingNode;
+                        relevantPlaces.add(p);
+// Increase the token count in that place by 1
+                        int count = tokenCount.get(p);
+                        count += 1;
+                        tokenCount.put(p, count);
+                    } else {
+                        System.err.println("Error: Outgoing PN node for transition is not a place?!");
+                    }
+                }
+            }
+
+// Check final marking: Only places that are in the (selected?) final marking should have 1 token remaining, all others 0
+//            Map<Marking,Integer> violationsPerFinalMarking = new HashMap<>();
+            Map<Marking, Set<Place>> violatingPlacesPerFinalMarking = new HashMap<>();
+
+            for (Place p : net.getNet().getPlaces()) {
+// Keep a list of violating places per final marking (as there are multiple), then choose the best option
+//                i.e., the one with the smallest number of violating places
+                for (Marking m : net.getFinalMarkings()) {
+                    if (m.contains(p)) {
+                        if (tokenCount.get(p) != 1) {
+                            // Violation!
+                            Set<Place> violatingPlacesTmp = violatingPlacesPerFinalMarking.getOrDefault(m, new HashSet<>());
+                            violatingPlacesTmp.add(p);
+                            violatingPlacesPerFinalMarking.put(m, violatingPlacesTmp);
+                        }
+                    } else {
+                        if (tokenCount.get(p) != 0) {
+                            // Violation!
+                            Set<Place> violatingPlacesTmp = violatingPlacesPerFinalMarking.getOrDefault(m, new HashSet<>());
+                            violatingPlacesTmp.add(p);
+                            violatingPlacesPerFinalMarking.put(m, violatingPlacesTmp);
+                        }
+                    }
+                }
+            }
+            Marking bestFinalMarking = null;
+            for (Marking m : net.getFinalMarkings()) {
+                if (bestFinalMarking == null || (violatingPlacesPerFinalMarking.get(m).size() < violatingPlacesPerFinalMarking.get(bestFinalMarking).size())) {
+                    // New best final marking found;
+                    bestFinalMarking = m;
+                }
+            }
+// Now add all violating places for selected best final marking to the violatingPlaces set
+            violatingPlaces.addAll(violatingPlacesPerFinalMarking.getOrDefault(bestFinalMarking, new HashSet<>()));
+
+//            Count Number of Relevant places
+            for (Place p : relevantPlaces) {
+                numberOfRelevantTracesPerPlace.put(p, numberOfRelevantTracesPerPlace.getOrDefault(p, 0) + allTracesWithFrequency.get(variant));
+// First add all relevant traces as fitting, remove the violating ones later
+                numberOfFittingTracesPerPlace.put(p, numberOfFittingTracesPerPlace.getOrDefault(p, 0) + allTracesWithFrequency.get(variant));
+            }
+//            Remove count for violating places
+            for (Place p : violatingPlaces) {
+                numberOfFittingTracesPerPlace.put(p, numberOfFittingTracesPerPlace.getOrDefault(p, 0) - allTracesWithFrequency.get(variant));
+            }
+        }
+        Map<Place, Double> ret = new HashMap<>();
+        for (Place p : net.getNet().getPlaces()) {
+            double numberOfRelevantTraces = numberOfRelevantTracesPerPlace.getOrDefault(p, 0);
+            if (numberOfRelevantTraces > 0) {
+                double numberOfFittingTraces = numberOfFittingTracesPerPlace.getOrDefault(p, 0);
+                ret.put(p, numberOfFittingTraces / numberOfRelevantTraces);
+            } else {
+                ret.put(p, 0.0);
+            }
+        }
+        return ret;
     }
 
     public static void replayAndRemovePlaces(AcceptingPetriNet net, String[] frequentVariants, boolean doNotRemoveStartEndPlaces) {

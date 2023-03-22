@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class Utils {
 
 
-    public static final String[] STANDARD_STEP_LABELS = {"L", "L", "Cnd₁(L)", "Cnd₂(L)", "Cnd₃(L)", "Sel(L)", "Places(L)", "Final_Places(L)"};
+    public static final String[] STANDARD_STEP_LABELS = {"L", "L", "L (DFG)", "Cnd₁(L)", "Cnd₂(L)", "Cnd₃(L)", "Sel(L)", "Places(L)", "Final_Places(L)"};
 
     // These colors are designed to be easily distinguishable
     // See also https://eleanormaclure.files.wordpress.com/2011/03/colour-coding.pdf and https://stackoverflow.com/questions/470690/how-to-automatically-generate-n-distinct-colors

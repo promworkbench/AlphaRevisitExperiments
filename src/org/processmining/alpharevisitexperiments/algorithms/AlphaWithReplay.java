@@ -40,7 +40,7 @@ public class AlphaWithReplay extends AlgorithmExperiment {
         LogProcessor logProcessor = new LogProcessor(log);
         HashMap<Pair<String, String>, Integer> dfg = logProcessor.getDfg();
         String[] frequentVariants = ReplayProcessor.getTopVariants(logProcessor.getVariants(), log.size(), this.getOptionValueByID(ReplayProcessor.FREQUENT_VARIANT_OPTION_ID));
-        ReplayProcessor.replayAndRemovePlaces(acceptingNet, frequentVariants, this.getOptionValueByID(ReplayProcessor.DO_NOT_REMOVE_STARTEND_PLACES_OPTION_ID));
+        ReplayProcessor.replayAndRemovePlaces(acceptingNet, frequentVariants, false);
 
         return acceptingNet;
     }

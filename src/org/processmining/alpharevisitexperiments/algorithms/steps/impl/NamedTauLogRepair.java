@@ -15,34 +15,46 @@ import java.util.stream.Collectors;
 public class NamedTauLogRepair extends LogRepairStep {
     public final static String NAME = "Named Tau Log Repair";
 
-
     final ExperimentOption[] options = {
+            new ExperimentOption<>(Double.class, "significant_df_threshold_relative", "significant_df_threshold_relative", 2.0, 0.1, 100000.0),
     };
 
     public NamedTauLogRepair() {
         super(NAME);
+        setOptions(options);
+    }
+
+
+    private static boolean isSignificantDFBetween(LogProcessor logProcessor, String a, String b, double df_threshold) {
+        return logProcessor.getDfg().getOrDefault(new Pair<>(a, b), 0) >= df_threshold;
     }
 
     @Override
     public LogProcessor repairLog(UIPluginContext context, LogProcessor logProcessor) {
         HashMap<Pair<String, String>, Integer> dfg = logProcessor.getDfg();
+        final double SIGNIFICANT_DF_THRESHOLD = logProcessor.getAbsoluteValueFromRelativeDFThreshold(this.getOptionValueByID("significant_df_threshold_relative"));
+        System.out.println("Using df_threshold of " + SIGNIFICANT_DF_THRESHOLD + " for SkipLogRepair");
+
         HashSet<String> newNamedTauActivities = new HashSet<>();
         for (String a : logProcessor.getActivities()) {
-            if (!dfg.containsKey(new Pair<>(a, a))) {
-                Set<String> outgoingFromA = dfg.keySet().stream().filter(r -> r.getFirst().equals(a)).map(r -> r.getSecond()).collect(Collectors.toSet());
+            if (dfg.getOrDefault(new Pair<>(a, a), 0) == 0) {
+                Set<String> outgoingFromA = dfg.keySet().stream().filter(r -> r.getFirst().equals(a) && dfg.get(r) >= SIGNIFICANT_DF_THRESHOLD).map(r -> r.getSecond()).collect(Collectors.toSet());
                 Set<String> canSkip = new HashSet<>();
-                for (Pair<String, String> df : dfg.keySet()) {
-                    if (df.getFirst().equals(a) && !df.getSecond().equals(a) && logProcessor.getActivities().contains(df.getSecond())) {
-                        String b = df.getSecond();
-                        if (!dfg.containsKey(new Pair<>(b, b)) && !dfg.containsKey(new Pair<>(b, a))) {
-                            Set<String> outgoingFromB = dfg.keySet().stream().filter(r -> r.getFirst().equals(b)).map(r -> r.getSecond()).collect(Collectors.toSet());
-                            if (outgoingFromA.containsAll(outgoingFromB)) {
-                                canSkip.add(b);
+                if (outgoingFromA.size() > 0) {
+
+                    for (Pair<String, String> df : dfg.keySet()) {
+                        if (df.getFirst().equals(a) && !df.getSecond().equals(a) && logProcessor.getActivities().contains(df.getSecond())) {
+                            String b = df.getSecond();
+                            if (!isSignificantDFBetween(logProcessor, b, b, SIGNIFICANT_DF_THRESHOLD) && !isSignificantDFBetween(logProcessor, b, a, SIGNIFICANT_DF_THRESHOLD)) {
+                                Set<String> outgoingFromB = dfg.keySet().stream().filter(r -> r.getFirst().equals(b) && dfg.get(r) >= SIGNIFICANT_DF_THRESHOLD).map(r -> r.getSecond()).collect(Collectors.toSet());
+                                if (outgoingFromA.containsAll(outgoingFromB)) {
+                                    canSkip.add(b);
+                                }
+
+
                             }
 
-
                         }
-
                     }
                 }
 // Update variants and DF
@@ -87,6 +99,9 @@ public class NamedTauLogRepair extends LogRepairStep {
             }
         }
         for (String newNamedTauAct : newNamedTauActivities) {
+            System.out.println("added new named tau activity: " + newNamedTauAct);
+//            Add new artificial activity to set of activities
+//            Note, that we already updated the count before (see above)
             logProcessor.getActivities().add(newNamedTauAct);
         }
         return logProcessor;

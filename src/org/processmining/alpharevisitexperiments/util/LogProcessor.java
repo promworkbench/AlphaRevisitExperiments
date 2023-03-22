@@ -23,6 +23,9 @@ public class LogProcessor {
 
     private int numberOfCases = 0;
 
+
+    private double meanDFInitial = 0;
+
     public LogProcessor(XLog log) {
         this.log = log;
         this.numberOfCases = log.size();
@@ -62,6 +65,10 @@ public class LogProcessor {
             Integer currentValue = dfg.getOrDefault(edge, 0);
             dfg.put(edge, currentValue + 1);
         }
+        int n = dfg.size();
+        double sum = dfg.values().stream().mapToInt(Integer::intValue).sum();
+        this.meanDFInitial = sum / n;
+
     }
 
     private void increaseActivityOccurenceByOne(String activity) {
@@ -126,5 +133,9 @@ public class LogProcessor {
 
     public HashSet<String> getLastInCaseActivities() {
         return lastInCaseActivities;
+    }
+
+    public double getAbsoluteValueFromRelativeDFThreshold(double relativeValue) {
+        return relativeValue * this.meanDFInitial;
     }
 }

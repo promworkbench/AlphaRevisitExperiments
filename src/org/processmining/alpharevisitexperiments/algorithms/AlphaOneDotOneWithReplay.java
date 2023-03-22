@@ -21,7 +21,7 @@ public class AlphaOneDotOneWithReplay extends AlgorithmExperiment {
     public AcceptingPetriNet execute(UIPluginContext context, XLog log) {
         AcceptingPetriNet net = alphaOneDotOne.execute(context, log);
         String[] frequentVariants = ReplayProcessor.getTopVariants(alphaOneDotOne.getLogProcessor().getVariants(), log.size(), this.getOptionValueByID(ReplayProcessor.FREQUENT_VARIANT_OPTION_ID));
-        ReplayProcessor.replayAndRemovePlaces(net, frequentVariants, this.getOptionValueByID(ReplayProcessor.DO_NOT_REMOVE_STARTEND_PLACES_OPTION_ID));
+        ReplayProcessor.replayAndRemovePlaces(net, frequentVariants, false);
         return net;
     }
 }

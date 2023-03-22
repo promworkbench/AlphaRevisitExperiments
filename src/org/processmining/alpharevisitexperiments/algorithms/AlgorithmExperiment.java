@@ -37,7 +37,6 @@ public abstract class AlgorithmExperiment {
         Optional<ExperimentOption> optional = Arrays.stream(options).filter(o -> o.getID().equals(id)).findAny();
         if (optional.isPresent()) {
             ExperimentOption option = optional.get();
-            System.out.println("Option " + id + ": " + option);
             T value = (T) option.getValue();
             return value;
         } else {

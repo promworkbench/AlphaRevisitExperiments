@@ -16,7 +16,7 @@ import java.util.Set;
 public class StepBasedAlgorithm extends AlgorithmExperiment {
     final static ExperimentOption[] NO_OPTIONS = {
     };
-    public LogRepairStep[] logRepairSteps = new LogRepairStep[]{new IdentityLogRepair(), new IdentityLogRepair()};
+    public LogRepairStep[] logRepairSteps = new LogRepairStep[]{new IdentityLogRepair(), new IdentityLogRepair(), new IdentityLogRepair()};
     public CandidateBuildingStep buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuilding();
     public CandidatePruningStep[] pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new IdentityCandidatePruning(), new MaximalCandidatesPruning()};
     public PetriNetBuildingStep buildingNetStep = new AlphaPetriNetBuilding();

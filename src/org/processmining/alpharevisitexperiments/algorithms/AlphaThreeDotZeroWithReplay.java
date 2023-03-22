@@ -26,7 +26,7 @@ public class AlphaThreeDotZeroWithReplay extends AlgorithmExperiment {
         alphaThreeDotZero.setOptions(options);
         AcceptingPetriNet net = alphaThreeDotZero.execute(context, log);
         String[] frequentVariants = ReplayProcessor.getTopVariants(alphaThreeDotZero.getLogProcessor().getVariants(), log.size(), this.getOptionValueByID(ReplayProcessor.FREQUENT_VARIANT_OPTION_ID));
-        ReplayProcessor.replayAndRemovePlaces(net, frequentVariants, this.getOptionValueByID(ReplayProcessor.DO_NOT_REMOVE_STARTEND_PLACES_OPTION_ID));
+        ReplayProcessor.replayAndRemovePlaces(net, frequentVariants, false);
         return net;
     }
 }

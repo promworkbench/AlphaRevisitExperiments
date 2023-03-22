@@ -26,7 +26,6 @@ public abstract class Step {
 
     public <T extends Comparable<?>> T getOptionValueByID(String id) {
         ExperimentOption option = Arrays.stream(options).filter(o -> o.getID().equals(id)).findAny().get();
-        System.out.println("Option " + id + ": " + option);
         T value = (T) option.getValue();
         return value;
     }
