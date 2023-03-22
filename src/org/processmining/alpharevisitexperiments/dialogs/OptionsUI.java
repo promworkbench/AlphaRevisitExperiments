@@ -145,9 +145,9 @@ public class OptionsUI extends javax.swing.JPanel {
         presetChooser.addItem("Alpha 1.1");
         presetChooser.addItem("Alpha 2.0");
         presetChooser.addItem("Alpha 3.0");
-        presetChooser.addItem("Alpha 3.0T");
-        presetChooser.addItem("Alpha 3.0SM");
-        presetChooser.addItem("Alpha 3.0EXP");
+//        presetChooser.addItem("Alpha 3.0T");
+//        presetChooser.addItem("Alpha 3.0SM");
+//        presetChooser.addItem("Alpha 3.0EXP");
         presetChooser.addItem("Alpha+++");
 
         presetChooser.setMaximumSize(presetChooser.getPreferredSize());
@@ -218,7 +218,7 @@ public class OptionsUI extends javax.swing.JPanel {
                     experiment.buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuilding();
                     experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new CandidateTraceFittingFilter(), new MaximalCandidatesPruning()};
                     experiment.buildingNetStep = new AlphaPetriNetBuilding();
-                    experiment.postProcessingPetriNetSteps = new PostProcessingPetriNetStep[]{new IdentityNetProcessing()};
+                    experiment.postProcessingPetriNetSteps = new PostProcessingPetriNetStep[]{new ReplayNetPostProcessing()};
                     variantListValueChanged(experiment);
                     return;
             }

@@ -58,7 +58,7 @@ public class AlphaRevisitExperimentPlugin {
 
     private static AlgorithmExperiment getExperimentOption(UIPluginContext context) {
         OptionsUI dialog = new OptionsUI();
-        TaskListener.InteractionResult result = context.showWizard("Choose an experiment", true, true, dialog);
+        TaskListener.InteractionResult result = context.showWizard("Choose an algorithm configuration", true, true, dialog);
 
         if (result != TaskListener.InteractionResult.FINISHED) {
             context.getFutureResult(0).cancel(true);

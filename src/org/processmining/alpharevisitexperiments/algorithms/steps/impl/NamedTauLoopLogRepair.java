@@ -17,7 +17,7 @@ public class NamedTauLoopLogRepair extends LogRepairStep {
 
 
     final ExperimentOption[] options = {
-            new ExperimentOption<>(Double.class, "significant_df_threshold_relative", "significant_df_threshold_relative", 2.0, 0.1, 100000.0),
+            new ExperimentOption<>(Double.class, "significant_df_threshold_relative", "DF Threshold (Relative to Mean DF Weight) (d)", 2.0, 0.1, 100000.0),
     };
 
     public NamedTauLoopLogRepair() {
@@ -34,6 +34,7 @@ public class NamedTauLoopLogRepair extends LogRepairStep {
     private Set<List<String>> getReachableBF(String activity, LogProcessor logProcessor, double df_threshold) {
         Set<List<String>> reachable = new HashSet<>();
         Set<List<String>> finishedReachable = new HashSet<>();
+        Set<List<String>> foundLoops = new HashSet<>();
         Set<String> directlyReachable = getDFActs(activity, logProcessor, df_threshold);
         for (String a : directlyReachable) {
             if (!a.equals(activity)) {
@@ -59,6 +60,7 @@ public class NamedTauLoopLogRepair extends LogRepairStep {
 //                                Loop found
                             newPath.add(a);
                             finishedReachable.add(newPath);
+                            foundLoops.add(newPath);
                         } else {
                             newPath.add(a);
                             additions.add(newPath);
@@ -71,8 +73,7 @@ public class NamedTauLoopLogRepair extends LogRepairStep {
             reachable.removeAll(finishedReachable);
         }
 //        Add also those without loops
-        finishedReachable.addAll(reachable);
-        return finishedReachable;
+        return foundLoops;
     }
 
     @Override

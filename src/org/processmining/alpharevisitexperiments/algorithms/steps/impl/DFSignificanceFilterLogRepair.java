@@ -11,10 +11,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DFSignificanceFilterLogRepair extends LogRepairStep {
-    public final static String NAME = "Filter DF using Threshold Log Repair";
+    public final static String NAME = "Create Advising DFG";
 
     final ExperimentOption[] options = {
-            new ExperimentOption<>(Double.class, "significant_df_threshold", "significant_df_threshold", 0.0, 0.0, 100000.0),
+            new ExperimentOption<>(Double.class, "significant_df_threshold", "Absolute DF threshold (n)", 1.0, 0.0, 100000.0),
     };
 
     public DFSignificanceFilterLogRepair() {

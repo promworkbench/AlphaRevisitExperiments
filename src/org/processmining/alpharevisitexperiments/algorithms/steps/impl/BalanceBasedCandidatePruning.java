@@ -14,7 +14,7 @@ public class BalanceBasedCandidatePruning extends CandidatePruningStep {
 
     public final static String NAME = "Prune Based on Balance";
     final ExperimentOption[] options = {
-            new ExperimentOption<>(Double.class, "balance_value", "Balance for candidate selection", 1.0, 0.0, 1.0),
+            new ExperimentOption<>(Double.class, "balance_value", "Balance Threshold (b)", 0.2, 0.0, 1.0),
     };
     private LogProcessor logProcessor;
 

@@ -19,7 +19,7 @@ public class ReplayNetPostProcessing extends PostProcessingPetriNetStep {
 
     public final static String NAME = "Replay & Remove problematic places";
     public final ExperimentOption[] options = {
-            new ExperimentOption<>(Double.class, FREQUENT_VARIANT_OPTION_ID, "replay_local_fitness_required", 0.0, 0.0, 1.0),
+            new ExperimentOption<>(Double.class, FREQUENT_VARIANT_OPTION_ID, "Local Place Replay Fitness Theshold (r)", 0.7, 0.0, 1.0),
     };
 
     public ReplayNetPostProcessing() {

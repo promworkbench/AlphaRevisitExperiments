@@ -14,7 +14,7 @@ public class CandidateTraceFittingFilter extends CandidatePruningStep {
 
     public final static String NAME = "Filter out low trace-fitness candidates";
     final ExperimentOption[] options = {
-            new ExperimentOption<>(Double.class, "min_fitting_traces", "Minimal fitting traces fraction", 0.0, 0.0, 1.0),
+            new ExperimentOption<>(Double.class, "min_fitting_traces", "Fitness threshold (t)", 0.8, 0.0, 1.0),
     };
 
     public CandidateTraceFittingFilter() {

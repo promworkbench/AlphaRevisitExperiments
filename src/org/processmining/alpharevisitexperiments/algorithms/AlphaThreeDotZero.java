@@ -23,7 +23,7 @@ import static org.processmining.alpharevisitexperiments.util.LogProcessor.START_
 
 public class AlphaThreeDotZero extends AlgorithmExperiment {
     final static ExperimentOption[] options = {
-            new ExperimentOption<>(Double.class, "balance_value", "Balance for candidate selection", 1.0, 0.0, 1.0),
+            new ExperimentOption<>(Double.class, "balance_value", "Balance threshold (b)", 1.0, 0.0, 1.0),
 //            new ExperimentOption<>(Boolean.class, "balance_ignore_startend", "Always include potential start/end places for b-balanced candidates.", false),
     };
     private Set<Pair<String, String>> dfRelation;

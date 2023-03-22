@@ -16,7 +16,7 @@ public class NamedTauLogRepair extends LogRepairStep {
     public final static String NAME = "Named Tau Log Repair";
 
     final ExperimentOption[] options = {
-            new ExperimentOption<>(Double.class, "significant_df_threshold_relative", "significant_df_threshold_relative", 2.0, 0.1, 100000.0),
+            new ExperimentOption<>(Double.class, "significant_df_threshold_relative", "DF Threshold (Relative to Mean DF Weight) (d)", 2.0, 0.1, 100000.0),
     };
 
     public NamedTauLogRepair() {
