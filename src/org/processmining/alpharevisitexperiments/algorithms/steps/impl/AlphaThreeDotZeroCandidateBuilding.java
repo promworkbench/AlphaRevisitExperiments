@@ -81,8 +81,8 @@ public class AlphaThreeDotZeroCandidateBuilding extends CandidateBuildingStep {
                 HashSet<String> second = new HashSet<>(a2);
                 second.addAll(b2);
 
-                Set<String> all = new HashSet<>(first);
-                all.addAll(second);
+//                Set<String> all = new HashSet<>(first);
+//                all.addAll(second);
                 if (Utils.areAllRelationsDFBetweenNonStrict(dfRelation, first, second)) { // checks 2
 
 //                    a1 + b1, (a1 + b1 - a2 - b2)

@@ -27,7 +27,7 @@ public class NamedTauLoopLogRepair extends LogRepairStep {
 
 
     private Set<String> getDFActs(String a, LogProcessor logProcessor, double df_threshold) {
-        return logProcessor.getDfg().keySet().stream().filter(e -> e.getFirst().equals(a) && logProcessor.getDfg().getOrDefault(e, 0) > df_threshold).map(e -> e.getSecond()).collect(Collectors.toSet());
+        return logProcessor.getDfg().keySet().stream().filter(e -> e.getFirst().equals(a) && logProcessor.getDfg().getOrDefault(e, 0) >= df_threshold).map(e -> e.getSecond()).collect(Collectors.toSet());
     }
 
 

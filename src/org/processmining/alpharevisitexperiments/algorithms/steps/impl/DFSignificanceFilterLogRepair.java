@@ -43,7 +43,7 @@ public class DFSignificanceFilterLogRepair extends LogRepairStep {
                 }
             }
             int v = dfg.get(k);
-            return !((v >= 0.01 * outgoingEdgeSum / outgoingEdgeCount || v >= 0.01 * incomingEdgeSum / incomingEdgeCount) && dfg.getOrDefault(k, 0) > SIGNIFICANT_DF_THRESHOLD);
+            return !((v >= 0.01 * outgoingEdgeSum / outgoingEdgeCount || v >= 0.01 * incomingEdgeSum / incomingEdgeCount) && dfg.getOrDefault(k, 0) >= SIGNIFICANT_DF_THRESHOLD);
         }).collect(Collectors.toSet());
         for (Pair<String, String> df : dfToDelete) {
             dfg.remove(df);
