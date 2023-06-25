@@ -263,7 +263,7 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
             newDebugText.append("<table style=\"padding-left: 20px;\">\n" + "  <tr style=\"text-align: center; border-bottom: 1px solid black;\">\n" + "    <th>Set</th>\n" + "    <th>Size</th>\n" + "    <th>Change</th>\n" + "  </tr>\n");
             if (usedAlgo instanceof StepBasedAlgorithm) {
                 StepBasedAlgorithm stepAlgo = (StepBasedAlgorithm) usedAlgo;
-                stepAlgo.candidateCountAfterStep.keySet().stream().sorted().forEach(i -> newDebugText.append("  <tr style=\"text-align: center; border-bottom: 1px solid black;\">\n").append("    <td>").append(Utils.STANDARD_STEP_LABELS[i]).append("</td>\n").append("    <td>").append(stepAlgo.candidateCountAfterStep.get(i)).append("</td>\n").append("    <td>").append(i > 0 ? (stepAlgo.candidateCountAfterStep.get(i) - stepAlgo.candidateCountAfterStep.get(i - 1)) : "-").append("</td>\n").append("  </tr>\n"));
+                stepAlgo.candidateCountAfterStep.keySet().stream().sorted().forEach(i -> newDebugText.append("  <tr style=\"text-align: center; border-bottom: 1px solid black;\">\n").append("    <td>").append(Utils.STANDARD_STEP_LABELS[i]).append("</td>\n").append("    <td>").append(stepAlgo.candidateCountAfterStep.get(i)).append("</td>\n").append("    <td>").append(stepAlgo.candidateCountAfterStep.containsKey(i - 1) ? (stepAlgo.candidateCountAfterStep.get(i) - stepAlgo.candidateCountAfterStep.get(i - 1)) : "-").append("</td>\n").append("  </tr>\n"));
                 newDebugText.append("</table>\n");
 
 

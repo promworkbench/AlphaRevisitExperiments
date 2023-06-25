@@ -35,6 +35,7 @@ public class StepBasedAlgorithm extends AlgorithmExperiment {
         LogProcessor logProcessor = initialLogProcessor;
         for (LogRepairStep logRepairStep : logRepairSteps) {
             logProcessor = logRepairStep.repairLog(context, logProcessor);
+            stepNum++;
         }
         Set<Pair<Set<String>, Set<String>>> candidates = buildingCandidatesStep.buildCandidates(context, logProcessor);
         candidateCountAfterStep.put(stepNum++, candidates.size());
