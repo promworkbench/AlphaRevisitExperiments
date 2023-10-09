@@ -10,6 +10,7 @@ import org.processmining.acceptingpetrinet.models.impl.AcceptingPetriNetImpl;
 import org.processmining.alpharevisitexperiments.algorithms.AlgorithmExperiment;
 import org.processmining.alpharevisitexperiments.algorithms.StepBasedAlgorithm;
 import org.processmining.alpharevisitexperiments.algorithms.steps.impl.StandardAlphaPetriNetBuilding;
+import org.processmining.alpharevisitexperiments.bridge.RustBridge;
 import org.processmining.alpharevisitexperiments.dialogs.OptionsUI;
 import org.processmining.alpharevisitexperiments.util.LogProcessor;
 import org.processmining.alpharevisitexperiments.util.Utils;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 
 import static org.processmining.alpharevisitexperiments.util.LogProcessor.END_ACTIVITY;
 import static org.processmining.alpharevisitexperiments.util.LogProcessor.START_ACTIVITY;
+import static org.processmining.alpharevisitexperiments.util.ReplayProcessor.FREQUENT_VARIANT_OPTION_ID;
 
 public class AlphaRevisitExperimentsVisualizer extends JPanel {
     public static final int SIDE_PANEL_WIDTH = 550;
@@ -65,6 +67,8 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
     ExperimentGUIRunner runner;
 
     JButton saveNetButton;
+
+    JButton goRust;
 
     JEditorPane debugText;
 
@@ -101,6 +105,13 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
 
         saveNetButton = new JButton("Save accepting Petri net in ProM");
         saveNetButton.setAlignmentX(CENTER_ALIGNMENT);
+        goRust = new JButton("Mine Petri Net (in Rust)");
+        goRust.setAlignmentX(CENTER_ALIGNMENT);
+        goRust.setPreferredSize(new Dimension(SIDE_PANEL_WIDTH, 50));
+        goRust.setBackground(new Color(247, 213, 190));
+        goRust.setVisible(false);
+        goRust.setEnabled(false);
+
         JComboBox viewSelector = SlickerFactory.instance().createComboBox(new String[]{});
         center.add(viewSelector);
         center.add(netVis);
@@ -137,6 +148,19 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
             this.useColors = useColorsCheckbox.isSelected();
             useColorsScaledCheckbox.setEnabled(useColorsCheckbox.isSelected());
         });
+
+        JCheckBox showRustoption = new JCheckBox("Show Rust Option (Using Binary Library)", false);
+        visOptionsPanel.add(showRustoption);
+        showRustoption.addActionListener(e -> {
+            if (showRustoption.isSelected()) {
+                goRust.setVisible(true);
+                goRust.setEnabled(true);
+            } else {
+                goRust.setVisible(false);
+                goRust.setEnabled(false);
+            }
+        });
+
         debugPanel.add(visOptionsPanel, BorderLayout.SOUTH);
         sidePanel.add(optionsUI, BorderLayout.CENTER);
 
@@ -145,14 +169,16 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
         progressBar = new JProgressBar();
         progressBar.setIndeterminate(true);
         progressBar.setVisible(false);
-        goButton = new JButton("Mine with selected options");
+        goButton = new JButton("Mine Petri Net (in Java)");
+        goButton.setBackground(new Color(207, 228, 252));
         goButton.setPreferredSize(new Dimension(SIDE_PANEL_WIDTH, 50));
         goButton.add(progressBar);
         bottomPanel.add(progressBar, BorderLayout.NORTH);
         bottomPanel.add(goButton, BorderLayout.CENTER);
+        bottomPanel.add(goRust, BorderLayout.SOUTH);
         sidePanel.add(bottomPanel, BorderLayout.SOUTH);
 
-        debugText.setText(getDebugText());
+        debugText.setText(getDebugText("Initial"));
         debugText.setCaretPosition(0);
 
         Petrinet sampleNet = PetrinetFactory.newPetrinet("Sample Petri net");
@@ -174,8 +200,6 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
         saveNetButton.setEnabled(false);
         saveNetButton.addActionListener(e -> {
             if (this.netRes != null && !this.netRes.isDestroyed()) {
-                debugText.setText(getDebugText());
-                debugText.setCaretPosition(0);
                 createNetVis();
                 this.netRes.setFavorite(true);
                 //           Adding a dummy net and removing it again fixes a weird glitch, where a new (favorite) APN does only appear
@@ -189,6 +213,68 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
             }
         });
 
+        goRust.addActionListener(e -> {
+            System.out.println("Test clicked!");
+            context.log("Executing test...");
+            class TestRunner extends SwingWorker<String, Void> {
+                @Override
+                protected String doInBackground() throws Exception {
+//                    XLog log = HelloProcessMining.test(logProcessor.getLog());
+                    goRust.setEnabled(false);
+                    goButton.setEnabled(false);
+                    progressBar.setVisible(true);
+                    try {
+
+                        StepBasedAlgorithm algo = (StepBasedAlgorithm) optionsUI.getSelectedExperiment();
+                        System.out.println(algo);
+                        RustBridge.AlphaPPPConfig config = new RustBridge.AlphaPPPConfig(0.3, 0.7, 0.0, 4.0, 4.0,
+                                1, 0.01);
+                        try {
+                            double b = algo.pruningCandidatesSteps[0].getOptionValueByID("balance_value");
+                            double t = algo.pruningCandidatesSteps[1].getOptionValueByID("min_fitting_traces");
+                            double logRepairRelativeLoop = algo.logRepairSteps[0].getOptionValueByID("significant_df_threshold_relative");
+                            double logRepairRelativeSkip = algo.logRepairSteps[1].getOptionValueByID("significant_df_threshold_relative");
+                            double absoluteDFThresh = algo.logRepairSteps[2].getOptionValueByID("significant_df_threshold");
+                            double r = algo.postProcessingPetriNetSteps[0].getOptionValueByID(FREQUENT_VARIANT_OPTION_ID);
+                            config = new RustBridge.AlphaPPPConfig(b, t, r, logRepairRelativeSkip, logRepairRelativeLoop,
+                                    (int) Math.ceil(absoluteDFThresh), 0.01);
+                        } catch (Exception e) {
+                            JOptionPane.showMessageDialog(null, "Rust Discovery can only be used for the Alpha+++ algorithm.\nPlease select the Alpha+++ template and only change numeric parameters without modifying the algorithm steps themselves.");
+                            return "Error";
+                        }
+
+//                        AcceptingPetriNet discoveredNet = HelloProcessMining.runRustAlphaPPPDiscovery(logProcessor.getLog(), config);
+                        AcceptingPetriNet discoveredNet = RustBridge.runRustAlphaPPPDiscovery(logProcessor, config);
+//                    System.out.println("Whole call took: " + ((System.nanoTime() -
+//                            startTime) / 1000000.0) + "ms");
+                        net = discoveredNet;
+                        netRes = (ProMResource<?>) createProMResourceFromAPN(context, net, "[Rust] Accepting Petri net of " + logName + " mined with Alpha+++");
+                        usedAlgo = null;
+                        debugText.setText(getDebugText("Rust"));
+                        debugText.setCaretPosition(0);
+                        createNetVis();
+                        revalidate();
+                        repaint();
+                    } catch (Exception e) {
+                        JOptionPane.showMessageDialog(null, "Could not discover Petri net using Rust library. Please check out the error printed in the console.");
+                        e.printStackTrace();
+
+                    } finally {
+                        goRust.setEnabled(true);
+                        goButton.setEnabled(true);
+                        progressBar.setVisible(false);
+                    }
+
+//                    org.processmining.framework.providedobjects.ProvidedObjectID x = context.getProvidedObjectManager().createProvidedObject("Rust Event Log", log, XLog.class, context);
+//                    final ProMResource<?> logRes = context.getGlobalContext().getResourceManager().getResourceForInstance(log);
+//                    logRes.setFavorite(true);
+                    System.out.println("Done!");
+                    return "Done";
+                }
+            }
+            context.getExecutor().execute(new TestRunner());
+        });
+
 //      Execute selected plugin with given options and display the resulting net
         goButton.addActionListener(e -> {
             this.usedAlgo = optionsUI.getSelectedExperiment();
@@ -199,6 +285,7 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
                 runner = new ExperimentGUIRunner(this.usedAlgo, context, logProcessorToUse);
                 progressBar.setVisible(true);
                 goButton.setEnabled(false);
+                goRust.setEnabled(false);
                 context.getExecutor().execute(runner);
             }
         });
@@ -230,10 +317,10 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
         return netRes;
     }
 
-    private String getDebugText() {
+    private String getDebugText(String type) {
         StringBuilder newDebugText = new StringBuilder();
         if (net != null) {
-            newDebugText.append("<h2>Petri net</h2><b>#Places: ").append(this.net.getNet().getPlaces().size()).append("</b><br/><b>#Arcs: ").append(this.net.getNet().getEdges().size()).append("</b><br/><b>#Transitions: ").append(this.net.getNet().getTransitions().size()).append("<br/>");
+            newDebugText.append("<h2>Petri net (").append(type).append(")</h2><b>#Places: ").append(this.net.getNet().getPlaces().size()).append("</b><br/><b>#Arcs: ").append(this.net.getNet().getEdges().size()).append("</b><br/><b>#Transitions: ").append(this.net.getNet().getTransitions().size()).append("<br/>");
         }
         newDebugText.append("<h2>Log</h2><b>Activities:</b><br/>");
         String[] activities = logProcessor.getActivityOccurrences().keySet().toArray(new String[0]);
@@ -401,22 +488,23 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
                     saveNetButton.setText("Save accepting Petri net in ProM");
 
                 }
-                debugText.setText(getDebugText());
+                debugText.setText(getDebugText("Java"));
                 debugText.setCaretPosition(0);
                 createNetVis();
                 revalidate();
                 repaint();
                 goButton.setEnabled(true);
+                goRust.setEnabled(true);
                 progressBar.setVisible(false);
                 context.getProgress().cancel();
                 context.getTask().destroy();
             } catch (Exception exception) {
                 goButton.setEnabled(true);
+                goRust.setEnabled(true);
                 progressBar.setVisible(false);
                 exception.printStackTrace();
                 System.err.println("AlphaRevisit Runner interrupted:" + exception);
                 context.getTask().destroy();
-//                    context.getFutureResult(0).cancel(true);
             }
         }
     }
