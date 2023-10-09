@@ -16,7 +16,7 @@ public class NamedTauLogRepair extends LogRepairStep {
     public final static String NAME = "Named Tau Log Repair";
 
     final ExperimentOption[] options = {
-            new ExperimentOption<>(Double.class, "significant_df_threshold_relative", "DF Threshold (Relative to Mean DF Weight) (d)", 2.0, 0.1, 100000.0),
+            new ExperimentOption<>(Double.class, "significant_df_threshold_relative", "DF Threshold (Relative to Mean DF Weight) (d)", 2.0, 0.0, 100000.0),
     };
 
     public NamedTauLogRepair() {
@@ -63,6 +63,11 @@ public class NamedTauLogRepair extends LogRepairStep {
                 }
             }
         }
+        System.out.println("Adding new artificial activities (" + skips.size() + " total)");
+        skips.forEach((a, b) -> {
+            System.out.println("Skippable: '" + a + "': (" + b.size() + ")" + String.join(",", b));
+
+        });
 // Update variants and DF
         for (String a : skips.keySet()) {
             Set<String> canSkip = skips.get(a);

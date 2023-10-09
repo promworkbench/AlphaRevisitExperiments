@@ -62,7 +62,7 @@ public class AlphaThreeDotZeroCandidateBuilding extends CandidateBuildingStep {
 //        }
 
 
-        System.out.println("Initial TIME" + TimeUnit.SECONDS.convert(System.nanoTime() - lastTimeStart, TimeUnit.NANOSECONDS));
+        System.out.println("Initial TIME: " + TimeUnit.SECONDS.convert(System.nanoTime() - lastTimeStart, TimeUnit.NANOSECONDS));
         lastTimeStart = System.nanoTime();
 
         context.log("Building initial candidate set...");
@@ -70,7 +70,7 @@ public class AlphaThreeDotZeroCandidateBuilding extends CandidateBuildingStep {
         cnd.addAll(expandCandidates);
         Set<Pair<Set<String>, Set<String>>> cndSet = new HashSet<>(initialCnd);
 
-        System.out.println("Cnd and cndset built TIME" + TimeUnit.SECONDS.convert(System.nanoTime() - lastTimeStart, TimeUnit.NANOSECONDS));
+        System.out.println("Cnd and cndset built TIME: " + TimeUnit.SECONDS.convert(System.nanoTime() - lastTimeStart, TimeUnit.NANOSECONDS));
         context.log("Recursively generating new candidates...");
         lastTimeStart = System.nanoTime();
         for (int i = 0; i < cnd.size(); i++) {
@@ -102,7 +102,7 @@ public class AlphaThreeDotZeroCandidateBuilding extends CandidateBuildingStep {
                 }
             }
         }
-
+        context.log("Took: " + TimeUnit.SECONDS.convert(System.nanoTime() - lastTimeStart, TimeUnit.NANOSECONDS));
         return cndSet;
     }
 }

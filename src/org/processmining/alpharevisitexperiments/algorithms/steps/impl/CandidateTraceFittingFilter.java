@@ -43,7 +43,7 @@ public class CandidateTraceFittingFilter extends CandidatePruningStep {
             String[] trace = variant.split(",");
             for (String a : allActsInCandidate) {
 //                    Does trace contain a?
-                if (Arrays.stream(trace).anyMatch((e) -> e.equals(a))) {
+                if (Arrays.asList(trace).contains(a)) {
                     int count = numOfTracesContainingAct.get(a);
                     numOfTracesContainingAct.put(a, count + weight);
                 }
@@ -52,6 +52,13 @@ public class CandidateTraceFittingFilter extends CandidatePruningStep {
                 numberOfTracesWithActs += weight;
             }
             for (String activity : trace) {
+
+//                if(candidate.getFirst().contains(activity) && candidate.getSecond().contains((activity))){
+//                    if(tokenCount <= 0){
+//                        tokenCount = -1;
+//                        break;
+//                    }
+//                }
                 if (candidate.getFirst().contains(activity)) {
                     tokenCount++;
                 }
@@ -73,7 +80,7 @@ public class CandidateTraceFittingFilter extends CandidatePruningStep {
                 fittingTraces += weight;
                 for (String a : allActsInCandidate) {
 //                    Does trace contain a?
-                    if (Arrays.stream(trace).anyMatch((e) -> e.equals(a))) {
+                    if (Arrays.asList(trace).contains(a)) {
                         int count = numOfFittingTracesContainingAct.get(a);
                         numOfFittingTracesContainingAct.put(a, count + weight);
                     }

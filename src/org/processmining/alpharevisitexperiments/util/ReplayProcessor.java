@@ -56,6 +56,7 @@ public class ReplayProcessor {
             for (Place p : net.getNet().getPlaces()) {
                 if (net.getInitialMarking().contains(p)) {
                     tokenCount.put(p, 1);
+                    relevantPlaces.add(p);
                 } else {
                     tokenCount.put(p, 0);
                 }
@@ -135,6 +136,9 @@ public class ReplayProcessor {
                     // New best final marking found;
                     bestFinalMarking = m;
                 }
+            }
+            if (bestFinalMarking != null) {
+                relevantPlaces.addAll(bestFinalMarking);
             }
 // Now add all violating places for selected best final marking to the violatingPlaces set
             violatingPlaces.addAll(violatingPlacesPerFinalMarking.getOrDefault(bestFinalMarking, new HashSet<>()));

@@ -10,6 +10,7 @@ import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.framework.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -27,6 +28,14 @@ public class StepBasedAlgorithm extends AlgorithmExperiment {
 
     public StepBasedAlgorithm() {
         super("Alpha-Based Algorithm with Modifiable Steps", NO_OPTIONS);
+
+        // Alpha+++ as default
+        this.logRepairSteps = new LogRepairStep[]{new NamedTauLoopLogRepair(), new NamedTauLogRepair(), new DFSignificanceFilterLogRepair()};
+        this.buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuilding();
+        this.pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new CandidateTraceFittingFilter(), new MaximalCandidatesPruning()};
+        this.buildingNetStep = new AlphaPetriNetBuilding();
+        this.postProcessingPetriNetSteps = new PostProcessingPetriNetStep[]{new ReplayNetPostProcessing()};
+
     }
 
     @Override
@@ -63,17 +72,11 @@ public class StepBasedAlgorithm extends AlgorithmExperiment {
 
     public Step[] getAllSteps() {
         ArrayList<Step> allSteps = new ArrayList<>();
-        for (Step step : this.logRepairSteps) {
-            allSteps.add(step);
-        }
+        allSteps.addAll(Arrays.asList(this.logRepairSteps));
         allSteps.add(this.buildingCandidatesStep);
-        for (Step step : this.pruningCandidatesSteps) {
-            allSteps.add(step);
-        }
+        allSteps.addAll(Arrays.asList(this.pruningCandidatesSteps));
         allSteps.add(this.buildingNetStep);
-        for (Step step : this.postProcessingPetriNetSteps) {
-            allSteps.add(step);
-        }
+        allSteps.addAll(Arrays.asList(this.postProcessingPetriNetSteps));
         return allSteps.toArray(new Step[]{});
     }
 }

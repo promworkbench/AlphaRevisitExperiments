@@ -92,7 +92,10 @@ public class NamedTauLoopLogRepair extends LogRepairStep {
             if (path.size() >= 2) {
                 String act = path.get(path.size() - 1);
                 String actBefore = path.get(path.size() - 2);
-                insertNamedTausBetween.add(new Pair<>(actBefore, act));
+
+                if (!actBefore.equals(act)) {
+                    insertNamedTausBetween.add(new Pair<>(actBefore, act));
+                }
             }
 
         }
