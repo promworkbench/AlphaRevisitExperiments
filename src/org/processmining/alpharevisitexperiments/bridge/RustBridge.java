@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import org.deckfour.xes.id.XID;
 import org.deckfour.xes.model.*;
@@ -109,17 +110,28 @@ public class RustBridge {
     }
 
     private static XTraceImpl getxEvents(long logPointer, Integer traceIndex) {
-        XAttributeMap[] traceAndEventAttrs = gson.fromJson(getCompleteRustTraceAsString(logPointer, traceIndex), xAttributeMapList);
-        XAttributeMap traceAttrs = traceAndEventAttrs[0];
-        XTraceImpl trace = IntStream.range(1, traceAndEventAttrs.length).boxed().map(i -> {
-            XAttributeMap eventAttrs = traceAndEventAttrs[i];
-            XID uuid = ((XAttributeIDImpl) eventAttrs.get("__UUID__")).getValue();
-            eventAttrs.remove("__UUID__");
-//            XAttributeMapImpl to = new XAttributeMapImpl(eventAttrs.size());
-//            addAllAttributesFromTo(eventAttrs, to);
-            return new XEventImpl(uuid, eventAttrs);
-        }).collect(Collectors.toCollection(() -> new XTraceImpl(traceAttrs)));
-        return trace;
+        String json = getCompleteRustTraceAsString(logPointer, traceIndex);
+        try {
+            ArrayList<XAttributeMap> traceAndEventAttrs = gson.fromJson(json, xAttributeMapList);
+            XAttributeMap traceAttrs = traceAndEventAttrs.get(0);
+            XTraceImpl trace = IntStream.range(1, traceAndEventAttrs.size()).boxed().map(i -> {
+                XAttributeMap eventAttrs = traceAndEventAttrs.get(i);
+                XID uuid = ((XAttributeIDImpl) eventAttrs.get("__UUID__")).getValue();
+                eventAttrs.remove("__UUID__");
+                return new XEventImpl(uuid, eventAttrs);
+            }).collect(Collectors.toCollection(() -> new XTraceImpl(traceAttrs)));
+            return trace;
+        } catch (ClassCastException e) {
+            XAttributeMap[] traceAndEventAttrs = gson.fromJson(json, xAttributeMapList);
+            XAttributeMap traceAttrs = traceAndEventAttrs[0];
+            XTraceImpl trace = IntStream.range(1, traceAndEventAttrs.length).boxed().map(i -> {
+                XAttributeMap eventAttrs = traceAndEventAttrs[i];
+                XID uuid = ((XAttributeIDImpl) eventAttrs.get("__UUID__")).getValue();
+                eventAttrs.remove("__UUID__");
+                return new XEventImpl(uuid, eventAttrs);
+            }).collect(Collectors.toCollection(() -> new XTraceImpl(traceAttrs)));
+            return trace;
+        }
     }
 
 
@@ -128,7 +140,6 @@ public class RustBridge {
         XAttributeMap logAttrsX = gson.fromJson(logAttributesJson, xAttributeMap);
         long numTraces = ((XAttributeDiscrete) logAttrsX.get("__NUM_TRACES__")).getValue();
         logAttrsX.remove("__NUM_TRACES__");
-//        XAttributeMapImpl logAttrsX = convertToXAttributeMap(logAttrs);
         int chunks = Runtime.getRuntime().availableProcessors();
         ExecutorService execService = Executors.newFixedThreadPool(chunks);
         List<Future<XTrace>> futures = new ArrayList<>();
@@ -168,8 +179,6 @@ public class RustBridge {
      * @return Pointer to Rust-side event log (as long); Needs to be manually destroyed by caller!
      */
     private static long javaLogToRustMultiEventsChunked(XLog l) {
-//        HashMap<String, String> attributes = new HashMap<>();
-//        attributes.put("name", "Java-called Rust Log Par :)");
         long pointer = createRustEventLogPar(l.size(), gson.toJson(l.getAttributes()));
         System.out.println("Created Rust EventLog Pointer " + pointer);
         int chunks = Runtime.getRuntime().availableProcessors();
@@ -179,8 +188,6 @@ public class RustBridge {
             final int traceIndex = traceId;
             final XTrace t = l.get(traceIndex);
             futures.add(execService.submit(() -> {
-//                HashMap<String, String> traceAttributes = new HashMap<>(t.getAttributes().size());
-//                addAllAttributesFromTo(t.getAttributes(), traceAttributes);
                 setTraceParHelper(pointer, traceIndex, t, t.getAttributes());
             }));
         }
@@ -419,22 +426,6 @@ public class RustBridge {
             throw new Exception("Could not discover net");
         }
     }
-
-    public static void main(String[] args) {
-        String json = "{\n" + "  \"test\": {\n" + "    \"key\": \"test\",\n" + "    \"value\": {\n" + "      \"type\": \"String\",\n" + "      \"content\": \"Hello\"\n" + "    }\n" + "  },\n" + "  \"boolean-test\": {\n" + "    \"key\": \"boolean-test\",\n" + "    \"value\": {\n" + "      \"type\": \"Boolean\",\n" + "      \"content\": true\n" + "    }\n" + "  },\n" + "  \"date-test\": {\n" + "    \"key\": \"date-test\",\n" + "    \"value\": {\n" + "      \"type\": \"Date\",\n" + "      \"content\": 0\n" + "    }\n" + "  },\n" + "  \"container-test\": {\n" + "    \"key\": \"container-test\",\n" + "    \"value\": {\n" + "      \"type\": \"Container\",\n" + "      \"content\": {\n" + "        \"first\": {\n" + "          \"key\": \"first\",\n" + "          \"value\": {\n" + "            \"type\": \"Int\",\n" + "            \"content\": 1\n" + "          }\n" + "        },\n" + "        \"second\": {\n" + "          \"key\": \"second\",\n" + "          \"value\": {\n" + "            \"type\": \"Int\",\n" + "            \"content\": 2\n" + "          }\n" + "        },\n" + "        \"third\": {\n" + "          \"key\": \"third\",\n" + "          \"value\": {\n" + "            \"type\": \"Int\",\n" + "            \"content\": 3\n" + "          }\n" + "        }\n" + "      }\n" + "    }\n" + "  },\n" + "  \"float-test\": {\n" + "    \"key\": \"float-test\",\n" + "    \"value\": {\n" + "      \"type\": \"Float\",\n" + "      \"content\": 1.337\n" + "    }\n" + "  },\n" + "  \"list-test\": {\n" + "    \"key\": \"list-test\",\n" + "    \"value\": {\n" + "      \"type\": \"List\",\n" + "      \"content\": [\n" + "        {\n" + "          \"key\": \"first\",\n" + "          \"value\": {\n" + "            \"type\": \"Int\",\n" + "            \"content\": 1\n" + "          }\n" + "        },\n" + "        {\n" + "          \"key\": \"first\",\n" + "          \"value\": {\n" + "            \"type\": \"Float\",\n" + "            \"content\": 1.1\n" + "          }\n" + "        },\n" + "        {\n" + "          \"key\": \"second\",\n" + "          \"value\": {\n" + "            \"type\": \"Int\",\n" + "            \"content\": 2\n" + "          }\n" + "        }\n" + "      ]\n" + "    }\n" + "  },\n" + "  \"int-test\": {\n" + "    \"key\": \"int-test\",\n" + "    \"value\": {\n" + "      \"type\": \"Int\",\n" + "      \"content\": 42\n" + "    }\n" + "  },\n" + "  \"id-test\": {\n" + "    \"key\": \"id-test\",\n" + "    \"value\": {\n" + "      \"type\": \"ID\",\n" + "      \"content\": \"6f535ff1-5523-43f3-9e06-a61394c356ec\"\n" + "    }\n" + "  }\n" + "}";
-//        XAttributeMap attributeMap = gson.fromJson(json, xAttributeMap);
-//        System.out.println(attributeMap);
-//        String backToJson = gson.toJson(attributeMap, xAttributeMap);
-//        XAttributeMap backToMap = gson.fromJson(backToJson, xAttributeMap);
-//        System.out.println(backToMap);
-//        System.out.println(backToMap.equals(attributeMap));
-//        System.out.println("Nice!");
-        int numTraces = 20_000;
-        int numEventsPerTrace = 20;
-        XLog xlog = createHugeXLog(numTraces, numEventsPerTrace);
-        createRustEventLogHelperPar(xlog);
-    }
-
     private static XLog createHugeXLog(int numTraces, int numEventsPerTrace) {
         XAttributeMapImpl logAttrs = new XAttributeMapImpl();
         logAttrs.put("name", new XAttributeLiteralImpl("name", "Huge Test Log"));
@@ -629,7 +620,16 @@ public class RustBridge {
         @Override
         public void write(JsonWriter out, XAttribute value) throws IOException {
             out.beginObject().name("key").value(value.getKey()).name("value").beginObject().name("type");
-            if (value instanceof XAttributeLiteral) {
+
+            if (value instanceof XAttributeList) {
+                out.value(AttributeType.List.type);
+                out.name("content");
+                gson.toJson(((XAttributeList) value).getCollection(), xAttributeList, out);
+            } else if (value instanceof XAttributeContainer) {
+                out.value(AttributeType.Container.type);
+                out.name("content");
+                gson.toJson(((XAttributeContainer) value).getAttributes(), xAttributeMap, out);
+            } else if (value instanceof XAttributeLiteral) {
                 out.value(AttributeType.String.type);
                 out.name("content");
                 out.value(((XAttributeLiteral) value).getValue());
@@ -653,20 +653,18 @@ public class RustBridge {
                 out.value(AttributeType.ID.type);
                 out.name("content");
                 out.value(((XAttributeID) value).getValue().toString());
-            } else if (value instanceof XAttributeList) {
-                out.value(AttributeType.List.type);
-                out.name("content");
-                gson.toJson(((XAttributeList) value).getCollection(), xAttributeMapList, out);
-            } else if (value instanceof XAttributeContainer) {
-                out.value(AttributeType.Container.type);
-                out.name("content");
-                gson.toJson(((XAttributeContainer) value).getAttributes(), xAttributeMap, out);
             } else {
                 throw new IOException("Unknown XAttribute type");
             }
 
-
-            out.endObject().endObject();
+            out.endObject();
+            out.name("own_attributes");
+            if (value.hasAttributes() && value.getAttributes().size() >= 1) {
+                gson.toJson(value.getAttributes(), xAttributeMap, out);
+            } else {
+                out.nullValue();
+            }
+            out.endObject();
         }
 
 
@@ -720,6 +718,15 @@ public class RustBridge {
                     break;
             }
             in.endObject();
+            in.nextName();
+            if (in.peek().equals(JsonToken.NULL)) {
+                in.nextNull();
+            } else {
+                while (!in.peek().equals(JsonToken.END_OBJECT)) {
+                    XAttributeMapImpl innerAttr = gson.fromJson(in, xAttributeMap);
+                    attr.getAttributes().putAll(innerAttr);
+                }
+            }
             in.endObject();
             return attr;
         }

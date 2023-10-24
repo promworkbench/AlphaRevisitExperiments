@@ -219,7 +219,6 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
             class TestRunner extends SwingWorker<String, Void> {
                 @Override
                 protected String doInBackground() throws Exception {
-//                    XLog log = HelloProcessMining.test(logProcessor.getLog());
                     goRust.setEnabled(false);
                     goButton.setEnabled(false);
                     progressBar.setVisible(true);
@@ -243,8 +242,10 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
                             return "Error";
                         }
 
-//                        AcceptingPetriNet discoveredNet = HelloProcessMining.runRustAlphaPPPDiscovery(logProcessor.getLog(), config);
                         AcceptingPetriNet discoveredNet = RustBridge.runRustAlphaPPPDiscovery(logProcessor, config);
+//                        AcceptingPetriNet discoveredNet = RustBridge.runRustAlphaPPPDiscovery(logProcessor.getLog(), config);
+//                        XLog newLog = RustBridge.createRustEventLogHelperPar(logProcessor.getLog());
+//                        context.getProvidedObjectManager().createProvidedObject("Rust <-> Log", newLog, XLog.class, context);
 //                    System.out.println("Whole call took: " + ((System.nanoTime() -
 //                            startTime) / 1000000.0) + "ms");
                         net = discoveredNet;
