@@ -53,11 +53,13 @@ public class LogProcessor {
                     dfg.put(edge, currentValue + 1);
                 }
                 if (i == trace.size() - 1) {
-                    edge = new Pair<>(previousActivity, activity);
+                    if (i > 0) {
+                        edge = new Pair<>(previousActivity, activity);
+                        Integer currentValue = dfg.getOrDefault(edge, 0);
+                        dfg.put(edge, currentValue + 1);
+                    }
                     int currTraceFrequency = variants.getOrDefault(String.join(",", currentTrace), 0);
                     variants.put(String.join(",", currentTrace), currTraceFrequency + 1);
-                    Integer currentValue = dfg.getOrDefault(edge, 0);
-                    dfg.put(edge, currentValue + 1);
                 } else if (i > 0) {
                     edge = new Pair<>(previousActivity, activity);
                     Integer currentValue = dfg.getOrDefault(edge, 0);
