@@ -2,6 +2,7 @@ package org.processmining.alpharevisitexperiments.algorithms.steps.impl;
 
 import org.processmining.alpharevisitexperiments.algorithms.steps.CandidatePruningStep;
 import org.processmining.alpharevisitexperiments.options.ExperimentOption;
+import org.processmining.alpharevisitexperiments.options.ExperimentOptionCandidateChangeIndicator;
 import org.processmining.alpharevisitexperiments.util.LogProcessor;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.framework.util.Pair;
@@ -14,7 +15,7 @@ public class BalanceBasedCandidatePruning extends CandidatePruningStep {
 
     public final static String NAME = "Prune Based on Balance";
     final ExperimentOption[] options = {
-            new ExperimentOption<>(Double.class, "balance_value", "Balance Threshold (b)", 0.2, 0.0, 1.0),
+            new ExperimentOption<>(Double.class, "balance_value", "Balance Threshold (b)", 0.2, 0.0, 1.0, "The balance threshold filters place candidates based on their (relative) frequency in the event log. A low balance value is a necessary (but not sufficient) condition for a fit place.", ExperimentOptionCandidateChangeIndicator.HIGH_INCREASES_CANDIDATES),
     };
     private LogProcessor logProcessor;
 

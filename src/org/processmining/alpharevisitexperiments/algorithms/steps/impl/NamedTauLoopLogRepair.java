@@ -2,6 +2,7 @@ package org.processmining.alpharevisitexperiments.algorithms.steps.impl;
 
 import org.processmining.alpharevisitexperiments.algorithms.steps.LogRepairStep;
 import org.processmining.alpharevisitexperiments.options.ExperimentOption;
+import org.processmining.alpharevisitexperiments.options.ExperimentOptionCandidateChangeIndicator;
 import org.processmining.alpharevisitexperiments.util.LogProcessor;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.framework.util.Pair;
@@ -17,7 +18,7 @@ public class NamedTauLoopLogRepair extends LogRepairStep {
 
 
     final ExperimentOption[] options = {
-            new ExperimentOption<>(Double.class, "significant_df_threshold_relative", "DF Threshold (Relative to Mean DF Weight) (d)", 2.0, 0.1, 100000.0),
+            new ExperimentOption<>(Double.class, "significant_df_threshold_relative", "DF Threshold (Relative to Mean DF Weight) (d)", 2.0, 0.1, 100000.0, "The specified (absolute) threshold determines which DF-relations to consider for detecting loops and skips.", ExperimentOptionCandidateChangeIndicator.DEPENDS),
     };
 
     public NamedTauLoopLogRepair() {

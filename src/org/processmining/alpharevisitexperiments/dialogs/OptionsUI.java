@@ -35,6 +35,9 @@ public class OptionsUI extends javax.swing.JPanel {
     private javax.swing.JScrollPane optionsScrollPane;
     private ProMList<StepBasedAlgorithm> variantList;
 
+    private final Image helpImage = Toolkit.getDefaultToolkit().getImage(OptionsUI.class.getResource("/org/processmining/alpharevisitexperiments/help.png"));
+
+
     public OptionsUI() {
         this(false);
     }
@@ -145,9 +148,6 @@ public class OptionsUI extends javax.swing.JPanel {
         presetChooser.addItem("Alpha 1.1");
         presetChooser.addItem("Alpha 2.0");
         presetChooser.addItem("Alpha 3.0");
-//        presetChooser.addItem("Alpha 3.0T");
-//        presetChooser.addItem("Alpha 3.0SM");
-//        presetChooser.addItem("Alpha 3.0EXP");
         presetChooser.addItem("Alpha+++");
 
         presetChooser.setMaximumSize(presetChooser.getPreferredSize());
@@ -202,14 +202,6 @@ public class OptionsUI extends javax.swing.JPanel {
                     experiment.buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuilding();
                     experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new CandidateTraceFittingFilter(), new ScoredMaximalCandidatesPruning()};
                     experiment.buildingNetStep = new AlphaPetriNetBuilding();
-                    experiment.postProcessingPetriNetSteps = new PostProcessingPetriNetStep[]{new IdentityNetProcessing()};
-                    variantListValueChanged(experiment);
-                    return;
-                case "Alpha 3.0EXP":
-                    experiment.logRepairSteps = new LogRepairStep[]{new IdentityLogRepair(), new IdentityLogRepair(), new IdentityLogRepair()};
-                    experiment.buildingCandidatesStep = new AlphaThreeDotZeroExperimentalCandidateBuilding();
-                    experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(), new IdentityCandidatePruning(), new MaximalCandidatesPruning()};
-                    experiment.buildingNetStep = new ExperimentalPetriNetBuilding();
                     experiment.postProcessingPetriNetSteps = new PostProcessingPetriNetStep[]{new IdentityNetProcessing()};
                     variantListValueChanged(experiment);
                     return;
@@ -275,7 +267,6 @@ public class OptionsUI extends javax.swing.JPanel {
                 stepChooser.addItem(StandardAlphaCandidateBuilding.NAME);
                 stepChooser.addItem(AlphaOneDotOneCandidateBuilding.NAME);
                 stepChooser.addItem(AlphaThreeDotZeroCandidateBuilding.NAME);
-                stepChooser.addItem(AlphaThreeDotZeroExperimentalCandidateBuilding.NAME);
                 stepChooser.setSelectedItem(step.name);
                 stepChooser.addActionListener(e -> {
                     System.out.println(e);
@@ -286,8 +277,6 @@ public class OptionsUI extends javax.swing.JPanel {
                         experiment.buildingCandidatesStep = new AlphaOneDotOneCandidateBuilding();
                     } else if (selectedItem.equals(StandardAlphaCandidateBuilding.NAME)) {
                         experiment.buildingCandidatesStep = new StandardAlphaCandidateBuilding();
-                    } else if (selectedItem.equals(AlphaThreeDotZeroExperimentalCandidateBuilding.NAME)) {
-                        experiment.buildingCandidatesStep = new AlphaThreeDotZeroExperimentalCandidateBuilding();
                     }
                     variantListValueChanged(experiment);
                     return;
@@ -324,7 +313,6 @@ public class OptionsUI extends javax.swing.JPanel {
             } else if (step instanceof PetriNetBuildingStep) {
                 stepChooser.addItem(StandardAlphaPetriNetBuilding.NAME);
                 stepChooser.addItem(AlphaPetriNetBuilding.NAME);
-                stepChooser.addItem(ExperimentalPetriNetBuilding.NAME);
                 stepChooser.setSelectedItem(step.name);
                 stepChooser.addActionListener(e -> {
                     System.out.println(e);
@@ -333,8 +321,6 @@ public class OptionsUI extends javax.swing.JPanel {
                         experiment.buildingNetStep = new AlphaPetriNetBuilding();
                     } else if (selectedItem.equals(StandardAlphaPetriNetBuilding.NAME)) {
                         experiment.buildingNetStep = new StandardAlphaPetriNetBuilding();
-                    } else if (selectedItem.equals(ExperimentalPetriNetBuilding.NAME)) {
-                        experiment.buildingNetStep = new ExperimentalPetriNetBuilding();
                     }
                     variantListValueChanged(experiment);
                     return;
@@ -361,17 +347,64 @@ public class OptionsUI extends javax.swing.JPanel {
             }
             stepChooser.setMaximumSize(stepChooser.getPreferredSize());
             stepChooser.setAlignmentX(LEFT_ALIGNMENT);
-            jPanel1.add(stepChooser, LEFT_ALIGNMENT);
+            jPanel1.add(stepChooser);
             optionValues = new HashMap<>();
             for (ExperimentOption option : options) {
                 JPanel panel = new JPanel();
+                panel.setOpaque(false);
                 panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
                 panel.setAlignmentX(LEFT_ALIGNMENT);
                 JTextArea jLabelName = createLabelWithTextWrap(option.getName());
                 jLabelName.setAlignmentX(LEFT_ALIGNMENT);
-                jLabelName.setFont(new Font("Dialog", Font.PLAIN, 13));
-                panel.add(jLabelName);
-                panel.setOpaque(false);
+                jLabelName.setBorder(new EmptyBorder(5, 0, 2, 0));
+                jLabelName.setFont(new Font("Dialog", Font.PLAIN, 16));
+                JPanel candidateChangeIndicator = new JPanel();
+                candidateChangeIndicator.setLayout(new BorderLayout());
+
+                ImageIcon hintIcon = new ImageIcon(helpImage);
+                JButton hintButton = new JButton(hintIcon);
+                hintButton.setToolTipText(option.getHintText());
+                hintButton.setPreferredSize(new Dimension(16 + 4, 16 + 4));
+                hintButton.addActionListener(e -> {
+                    JOptionPane.showMessageDialog(null, option.getHintText(), "Information on " + option.getName(), JOptionPane.INFORMATION_MESSAGE);
+                });
+                hintButton.setToolTipText(option.getHintText());
+                hintButton.setAlignmentX(RIGHT_ALIGNMENT);
+                JPanel topPanel = new JPanel();
+                topPanel.add(jLabelName, LEFT_ALIGNMENT);
+                topPanel.add(hintButton, RIGHT_ALIGNMENT);
+                topPanel.setAlignmentX(LEFT_ALIGNMENT);
+                candidateChangeIndicator.add(topPanel, BorderLayout.PAGE_START);
+
+                if (option.getType() == Integer.class || option.getType() == Double.class) {
+                    String leftIndicator = "";
+                    String rightIndicator = "";
+                    switch (option.getChangeIndicator()) {
+                        case HIGH_INCREASES_CANDIDATES:
+                            rightIndicator = "More Places";
+                            leftIndicator = "Less Places";
+                            break;
+                        case HIGH_DECREASES_CANDIDATES:
+                            rightIndicator = "Less Places";
+                            leftIndicator = "More Places";
+                            break;
+                        case DEPENDS:
+                            leftIndicator = "Depends";
+                            rightIndicator = "Depends";
+                            break;
+                    }
+                    JLabel hintNameLeft = new JLabel(leftIndicator);
+                    hintNameLeft.setForeground(Color.DARK_GRAY);
+                    hintNameLeft.setFont(new Font("Dialog", Font.ITALIC, 13));
+                    JLabel hintNameRight = new JLabel(rightIndicator);
+                    hintNameRight.setForeground(Color.DARK_GRAY);
+                    hintNameRight.setFont(new Font("Dialog", Font.ITALIC, 13));
+                    candidateChangeIndicator.add(hintNameLeft, BorderLayout.LINE_START);
+                    candidateChangeIndicator.add(hintNameRight, BorderLayout.LINE_END);
+                }
+                candidateChangeIndicator.setAlignmentX(LEFT_ALIGNMENT);
+                panel.add(candidateChangeIndicator, LEFT_ALIGNMENT);
+
                 if (option.getType() == Integer.class) {
                     ExperimentOption<Integer> integerOption = (ExperimentOption<Integer>) option;
                     NiceIntegerSlider jslider = SlickerFactory.instance().createNiceIntegerSlider("Select", integerOption.getMinValue(), integerOption.getMaxValue(), integerOption.getStartValue(), NiceSlider.Orientation.HORIZONTAL);
@@ -420,7 +453,6 @@ public class OptionsUI extends javax.swing.JPanel {
                 } else {
                     System.err.println("Other options not yet implemented!");
                 }
-
                 panel.setMaximumSize(new Dimension(panel.getPreferredSize().width, panel.getPreferredSize().height + 0));
                 jPanel1.add(panel);
             }

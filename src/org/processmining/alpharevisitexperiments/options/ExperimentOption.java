@@ -9,16 +9,22 @@ public class ExperimentOption<T extends Comparable<T>> {
     private T maxValue;
     private T minValue;
 
-    public ExperimentOption(Class<T> type, String id, String name, T startValue) {
+    private final String hintText;
+
+    private final ExperimentOptionCandidateChangeIndicator changeIndicator;
+
+    public ExperimentOption(Class<T> type, String id, String name, T startValue, String hintText, ExperimentOptionCandidateChangeIndicator changeIndicator) {
         this.id = id;
         this.name = name;
         this.startValue = startValue;
         this.setValue(startValue);
         this.type = type;
+        this.hintText = hintText;
+        this.changeIndicator = changeIndicator;
     }
 
-    public ExperimentOption(Class<T> type, String id, String name, T startValue, T minValue, T maxValue) {
-        this(type, id, name, startValue);
+    public ExperimentOption(Class<T> type, String id, String name, T startValue, T minValue, T maxValue, String hintText, ExperimentOptionCandidateChangeIndicator changeIndicator) {
+        this(type, id, name, startValue, hintText, changeIndicator);
         this.minValue = minValue;
         this.maxValue = maxValue;
     }
@@ -61,4 +67,11 @@ public class ExperimentOption<T extends Comparable<T>> {
         return maxValue;
     }
 
+    public String getHintText() {
+        return hintText;
+    }
+
+    public ExperimentOptionCandidateChangeIndicator getChangeIndicator() {
+        return changeIndicator;
+    }
 }

@@ -126,8 +126,8 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
         JScrollPane debugScrollPanel = new JScrollPane(debugText);
         debugPanel.add(debugScrollPanel, BorderLayout.CENTER);
 
-        debugPanel.setMinimumSize(new Dimension(SIDE_PANEL_WIDTH, 400));
-        debugPanel.setPreferredSize(new Dimension(SIDE_PANEL_WIDTH, 400));
+        debugPanel.setMinimumSize(new Dimension(SIDE_PANEL_WIDTH, 300));
+        debugPanel.setPreferredSize(new Dimension(SIDE_PANEL_WIDTH, 300));
         sidePanel.add(debugPanel, BorderLayout.NORTH);
 
         OptionsUI optionsUI = new OptionsUI(true);

@@ -1,0 +1,6 @@
+.idea/
+.settings/
+.svn/
+bin/
+tests/bin-test/
+tests/libs-external/

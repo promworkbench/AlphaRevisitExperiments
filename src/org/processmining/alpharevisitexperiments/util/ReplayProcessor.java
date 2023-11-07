@@ -2,6 +2,7 @@ package org.processmining.alpharevisitexperiments.util;
 
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.alpharevisitexperiments.options.ExperimentOption;
+import org.processmining.alpharevisitexperiments.options.ExperimentOptionCandidateChangeIndicator;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetEdge;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
@@ -14,7 +15,7 @@ public class ReplayProcessor {
 
     public final static String FREQUENT_VARIANT_OPTION_ID = "replay_local_fitness_required";
     public final static ExperimentOption[] STANDARD_REPLAY_OPTIONS = {
-            new ExperimentOption<>(Double.class, FREQUENT_VARIANT_OPTION_ID, "replay_local_fitness_required", 0.0, 0.0, 1.0),
+            new ExperimentOption<>(Double.class, FREQUENT_VARIANT_OPTION_ID, "replay_local_fitness_required", 0.0, 0.0, 1.0, "Replays Petri net after construction and filters places based on their local fitness.", ExperimentOptionCandidateChangeIndicator.HIGH_DECREASES_CANDIDATES),
     };
 
     public static String[] getTopVariants(HashMap<String, Integer> allVariantsWithCaseNumbers, int totalNumberOfCases,

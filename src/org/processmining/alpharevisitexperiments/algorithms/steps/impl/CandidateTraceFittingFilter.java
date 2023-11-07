@@ -3,6 +3,7 @@ package org.processmining.alpharevisitexperiments.algorithms.steps.impl;
 import com.google.common.collect.Sets;
 import org.processmining.alpharevisitexperiments.algorithms.steps.CandidatePruningStep;
 import org.processmining.alpharevisitexperiments.options.ExperimentOption;
+import org.processmining.alpharevisitexperiments.options.ExperimentOptionCandidateChangeIndicator;
 import org.processmining.alpharevisitexperiments.util.LogProcessor;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.framework.util.Pair;
@@ -14,7 +15,7 @@ public class CandidateTraceFittingFilter extends CandidatePruningStep {
 
     public final static String NAME = "Filter out low trace-fitness candidates";
     final ExperimentOption[] options = {
-            new ExperimentOption<>(Double.class, "min_fitting_traces", "Fitness threshold (t)", 0.8, 0.0, 1.0),
+            new ExperimentOption<>(Double.class, "min_fitting_traces", "Fitness threshold (t)", 0.8, 0.0, 1.0, "Locally replay event log traces on place candidates and filter out candidates based on how well they fit the traces, removing all candidates with fitness percentage below the specified value.", ExperimentOptionCandidateChangeIndicator.HIGH_DECREASES_CANDIDATES),
     };
 
     public CandidateTraceFittingFilter() {

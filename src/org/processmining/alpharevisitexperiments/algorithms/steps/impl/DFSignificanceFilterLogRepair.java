@@ -2,6 +2,7 @@ package org.processmining.alpharevisitexperiments.algorithms.steps.impl;
 
 import org.processmining.alpharevisitexperiments.algorithms.steps.LogRepairStep;
 import org.processmining.alpharevisitexperiments.options.ExperimentOption;
+import org.processmining.alpharevisitexperiments.options.ExperimentOptionCandidateChangeIndicator;
 import org.processmining.alpharevisitexperiments.util.LogProcessor;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.framework.util.Pair;
@@ -14,7 +15,7 @@ public class DFSignificanceFilterLogRepair extends LogRepairStep {
     public final static String NAME = "Create Advising DFG";
 
     final ExperimentOption[] options = {
-            new ExperimentOption<>(Double.class, "significant_df_threshold", "Absolute DF threshold (n)", 1.0, 0.0, 100000.0),
+            new ExperimentOption<>(Double.class, "significant_df_threshold", "Absolute DF threshold (n)", 1.0, 0.0, 100000.0, "Filter DFG based on the given absolute threshold (i.e., removing low-frequency edges in DFG).", ExperimentOptionCandidateChangeIndicator.DEPENDS),
     };
 
     public DFSignificanceFilterLogRepair() {

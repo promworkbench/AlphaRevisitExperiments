@@ -3,6 +3,7 @@ package org.processmining.alpharevisitexperiments.algorithms.steps.impl;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.alpharevisitexperiments.algorithms.steps.PostProcessingPetriNetStep;
 import org.processmining.alpharevisitexperiments.options.ExperimentOption;
+import org.processmining.alpharevisitexperiments.options.ExperimentOptionCandidateChangeIndicator;
 import org.processmining.alpharevisitexperiments.util.LogProcessor;
 import org.processmining.alpharevisitexperiments.util.ReplayProcessor;
 import org.processmining.contexts.uitopia.UIPluginContext;
@@ -19,7 +20,7 @@ public class ReplayNetPostProcessing extends PostProcessingPetriNetStep {
 
     public final static String NAME = "Replay & Remove problematic places";
     public final ExperimentOption[] options = {
-            new ExperimentOption<>(Double.class, FREQUENT_VARIANT_OPTION_ID, "Local Place Replay Fitness Theshold (r)", 0.0, 0.0, 1.0),
+            new ExperimentOption<>(Double.class, FREQUENT_VARIANT_OPTION_ID, "Local Place Replay Fitness Theshold (r)", 0.0, 0.0, 1.0, "Replays Petri net after construction and filters out places if their local fitness is below the specified threshold.", ExperimentOptionCandidateChangeIndicator.HIGH_DECREASES_CANDIDATES),
     };
 
     public ReplayNetPostProcessing() {
