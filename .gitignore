@@ -2,5 +2,7 @@
 .settings/
 .svn/
 bin/
+doc/
+ivy/
 tests/bin-test/
 tests/libs-external/

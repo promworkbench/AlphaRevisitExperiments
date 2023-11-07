@@ -2,6 +2,7 @@ package org.processmining.alpharevisitexperiments.algorithms.steps.impl;
 
 import org.processmining.alpharevisitexperiments.algorithms.steps.LogRepairStep;
 import org.processmining.alpharevisitexperiments.options.ExperimentOption;
+import org.processmining.alpharevisitexperiments.options.ExperimentOptionCandidateChangeIndicator;
 import org.processmining.alpharevisitexperiments.util.LogProcessor;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.framework.util.Pair;
@@ -18,7 +19,7 @@ public class InfrequentVariantEliminationLogRepair extends LogRepairStep {
 
 
     final ExperimentOption[] options = {
-            new ExperimentOption<>(Double.class, "top_perc_to_keep", "Keep most frequent variants to cover this % of all cases", 100.0, 0.0, 100.0),
+            new ExperimentOption<>(Double.class, "top_perc_to_keep", "Keep most frequent variants accounting to this % of traces", 100.0, 0.0, 100.0, "Keep the most frequent trace variants accounting for the specified percentage of traces. The other, low-frequent, case variants are removed.", ExperimentOptionCandidateChangeIndicator.DEPENDS),
 
     };
 
