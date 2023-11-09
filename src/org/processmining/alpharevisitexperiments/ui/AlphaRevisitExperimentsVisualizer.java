@@ -9,7 +9,10 @@ import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.acceptingpetrinet.models.impl.AcceptingPetriNetImpl;
 import org.processmining.alpharevisitexperiments.algorithms.AlgorithmExperiment;
 import org.processmining.alpharevisitexperiments.algorithms.StepBasedAlgorithm;
-import org.processmining.alpharevisitexperiments.algorithms.steps.impl.StandardAlphaPetriNetBuilding;
+import org.processmining.alpharevisitexperiments.algorithms.steps.CandidatePruningStep;
+import org.processmining.alpharevisitexperiments.algorithms.steps.LogRepairStep;
+import org.processmining.alpharevisitexperiments.algorithms.steps.PostProcessingPetriNetStep;
+import org.processmining.alpharevisitexperiments.algorithms.steps.impl.*;
 import org.processmining.alpharevisitexperiments.bridge.RustBridge;
 import org.processmining.alpharevisitexperiments.dialogs.OptionsUI;
 import org.processmining.alpharevisitexperiments.util.LogProcessor;
@@ -77,7 +80,7 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
     JProgressBar progressBar;
 
     boolean useColors = false;
-    boolean useColorsScaled = false;
+    boolean useColorsScaled = true;
 
     public AlphaRevisitExperimentsVisualizer(UIPluginContext context, XLog log) {
         this.log = log;
@@ -137,29 +140,56 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
         JCheckBox useColorsCheckbox = new JCheckBox("Color transitions to highlight DF relations that are not covered", false);
         visOptionsPanel.add(useColorsCheckbox);
 
-        JCheckBox useColorsScaledCheckbox = new JCheckBox("Scale color opacity based on DF frequency", false);
-        useColorsScaledCheckbox.setEnabled(this.useColors);
-        useColorsScaledCheckbox.addActionListener(e -> {
-            this.useColorsScaled = useColorsScaledCheckbox.isSelected();
-        });
-        visOptionsPanel.add(useColorsScaledCheckbox);
+//        Disabled useColorsScaledCheckbox for now (for UI clarity)
+
+//        JCheckBox useColorsScaledCheckbox = new JCheckBox("Scale color opacity based on DF frequency", true);
+//        useColorsScaledCheckbox.setEnabled(this.useColors);
+//        useColorsScaledCheckbox.addActionListener(e -> {
+//            this.useColorsScaled = useColorsScaledCheckbox.isSelected();
+//        });
+//        visOptionsPanel.add(useColorsScaledCheckbox);
 
         useColorsCheckbox.addActionListener(e -> {
             this.useColors = useColorsCheckbox.isSelected();
-            useColorsScaledCheckbox.setEnabled(useColorsCheckbox.isSelected());
+//            useColorsScaledCheckbox.setEnabled(useColorsCheckbox.isSelected());
         });
 
         JCheckBox showRustoption = new JCheckBox("Show Rust Option (Using Binary Library)", false);
         visOptionsPanel.add(showRustoption);
+        JCheckBox autoParameters = new JCheckBox("Automatically Find Parameters (Rust only)", false);
+        autoParameters.setEnabled(showRustoption.isSelected());
+        autoParameters.addActionListener(e -> {
+            if(autoParameters.isSelected()){
+                optionsUI.setOptionsDisabled(true);
+                optionsUI.variantListValueChanged((StepBasedAlgorithm) optionsUI.getSelectedExperiment());
+                goButton.setEnabled(false);
+
+            }else{
+                optionsUI.setOptionsDisabled(false);
+                optionsUI.variantListValueChanged((StepBasedAlgorithm) optionsUI.getSelectedExperiment());
+                goButton.setEnabled(true);
+            }
+        });
         showRustoption.addActionListener(e -> {
+                optionsUI.validate();
             if (showRustoption.isSelected()) {
                 goRust.setVisible(true);
                 goRust.setEnabled(true);
+                autoParameters.setEnabled(true);
             } else {
                 goRust.setVisible(false);
                 goRust.setEnabled(false);
+                autoParameters.setEnabled(false);
+                autoParameters.setSelected(false);
+                if(optionsUI.isOptionsDisabled()){
+                    optionsUI.setOptionsDisabled(false);
+                    optionsUI.variantListValueChanged((StepBasedAlgorithm) optionsUI.getSelectedExperiment());
+                    goButton.setEnabled(true);
+                }
             }
         });
+
+        visOptionsPanel.add(autoParameters);
 
         debugPanel.add(visOptionsPanel, BorderLayout.SOUTH);
         sidePanel.add(optionsUI, BorderLayout.CENTER);
@@ -214,41 +244,46 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
         });
 
         goRust.addActionListener(e -> {
-            System.out.println("Test clicked!");
-            context.log("Executing test...");
-            class TestRunner extends SwingWorker<String, Void> {
+            context.log("Executing discovery in Rust...");
+            class RustExecutionRunner extends SwingWorker<Void, Void> {
                 @Override
-                protected String doInBackground() throws Exception {
+                protected Void doInBackground() throws Exception {
                     goRust.setEnabled(false);
                     goButton.setEnabled(false);
                     progressBar.setVisible(true);
                     try {
-
                         StepBasedAlgorithm algo = (StepBasedAlgorithm) optionsUI.getSelectedExperiment();
                         System.out.println(algo);
-                        RustBridge.AlphaPPPConfig config = new RustBridge.AlphaPPPConfig(0.3, 0.7, 0.0, 4.0, 4.0,
-                                1, 0.01);
-                        try {
-                            double b = algo.pruningCandidatesSteps[0].getOptionValueByID("balance_value");
-                            double t = algo.pruningCandidatesSteps[1].getOptionValueByID("min_fitting_traces");
-                            double logRepairRelativeLoop = algo.logRepairSteps[0].getOptionValueByID("significant_df_threshold_relative");
-                            double logRepairRelativeSkip = algo.logRepairSteps[1].getOptionValueByID("significant_df_threshold_relative");
-                            double absoluteDFThresh = algo.logRepairSteps[2].getOptionValueByID("significant_df_threshold");
-                            double r = algo.postProcessingPetriNetSteps[0].getOptionValueByID(FREQUENT_VARIANT_OPTION_ID);
-                            config = new RustBridge.AlphaPPPConfig(b, t, r, logRepairRelativeSkip, logRepairRelativeLoop,
-                                    (int) Math.ceil(absoluteDFThresh), 0.01);
-                        } catch (Exception e) {
-                            JOptionPane.showMessageDialog(null, "Rust Discovery can only be used for the Alpha+++ algorithm.\nPlease select the Alpha+++ template and only change numeric parameters without modifying the algorithm steps themselves.");
-                            return "Error";
+                        if(autoParameters.isSelected()){
+                            Pair<RustBridge.AlphaPPPConfig, AcceptingPetriNet> autoResults = RustBridge.runRustAlphaPPPDiscoveryAuto(logProcessor);
+                            net = autoResults.getSecond();
+                            RustBridge.AlphaPPPConfig config = autoResults.getFirst();
+                           StepBasedAlgorithm experiment = (StepBasedAlgorithm) optionsUI.getSelectedExperiment();
+                            experiment.logRepairSteps = new LogRepairStep[]{new NamedTauLoopLogRepair(config.log_repair_loop_df_thresh_rel), new NamedTauLogRepair(config.log_repair_skip_df_thresh_rel), new DFSignificanceFilterLogRepair(config.absolute_df_clean_thresh, config.relative_df_clean_thresh)};
+                            experiment.buildingCandidatesStep = new AlphaThreeDotZeroCandidateBuilding();
+                            experiment.pruningCandidatesSteps = new CandidatePruningStep[]{new BalanceBasedCandidatePruning(config.balance_thresh), new CandidateTraceFittingFilter(config.fitness_thresh), new MaximalCandidatesPruning()};
+                            experiment.buildingNetStep = new AlphaPetriNetBuilding();
+                            experiment.postProcessingPetriNetSteps = new PostProcessingPetriNetStep[]{new ReplayNetPostProcessing(config.replay_thresh)};
+                            optionsUI.variantListValueChanged(experiment);
+                        }else{
+                            RustBridge.AlphaPPPConfig config = new RustBridge.AlphaPPPConfig(0.3, 0.7, 0.0, 4.0, 4.0,
+                                    1, 0.01);
+                            try {
+                                double b = algo.pruningCandidatesSteps[0].getOptionValueByID("balance_value");
+                                double t = algo.pruningCandidatesSteps[1].getOptionValueByID("min_fitting_traces");
+                                double logRepairRelativeLoop = algo.logRepairSteps[0].getOptionValueByID("significant_df_threshold_relative");
+                                double logRepairRelativeSkip = algo.logRepairSteps[1].getOptionValueByID("significant_df_threshold_relative");
+                                int absoluteDFThresh = algo.logRepairSteps[2].getOptionValueByID("significant_df_threshold");
+                                double r = algo.postProcessingPetriNetSteps[0].getOptionValueByID(FREQUENT_VARIANT_OPTION_ID);
+                                config = new RustBridge.AlphaPPPConfig(b, t, r, logRepairRelativeSkip, logRepairRelativeLoop, absoluteDFThresh, 0.01);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                JOptionPane.showMessageDialog(null, "Rust Discovery can only be used for the Alpha+++ algorithm.\nPlease select the Alpha+++ template and only change numeric parameters without modifying the algorithm steps themselves.");
+                                return null;
+                            }
+                            AcceptingPetriNet discoveredNet = RustBridge.runRustAlphaPPPDiscovery(logProcessor, config);
+                            net = discoveredNet;
                         }
-
-                        AcceptingPetriNet discoveredNet = RustBridge.runRustAlphaPPPDiscovery(logProcessor, config);
-//                        AcceptingPetriNet discoveredNet = RustBridge.runRustAlphaPPPDiscovery(logProcessor.getLog(), config);
-//                        XLog newLog = RustBridge.createRustEventLogHelperPar(logProcessor.getLog());
-//                        context.getProvidedObjectManager().createProvidedObject("Rust <-> Log", newLog, XLog.class, context);
-//                    System.out.println("Whole call took: " + ((System.nanoTime() -
-//                            startTime) / 1000000.0) + "ms");
-                        net = discoveredNet;
                         netRes = (ProMResource<?>) createProMResourceFromAPN(context, net, "[Rust] Accepting Petri net of " + logName + " mined with Alpha+++");
                         usedAlgo = null;
                         debugText.setText(getDebugText("Rust"));
@@ -262,7 +297,9 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
 
                     } finally {
                         goRust.setEnabled(true);
-                        goButton.setEnabled(true);
+                        if(!autoParameters.isSelected()){
+                            goButton.setEnabled(true);
+                        }
                         progressBar.setVisible(false);
                     }
 
@@ -270,10 +307,10 @@ public class AlphaRevisitExperimentsVisualizer extends JPanel {
 //                    final ProMResource<?> logRes = context.getGlobalContext().getResourceManager().getResourceForInstance(log);
 //                    logRes.setFavorite(true);
                     System.out.println("Done!");
-                    return "Done";
+                    return null;
                 }
             }
-            context.getExecutor().execute(new TestRunner());
+            context.getExecutor().execute(new RustExecutionRunner());
         });
 
 //      Execute selected plugin with given options and display the resulting net

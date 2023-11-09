@@ -27,16 +27,14 @@ public class OptionsUI extends javax.swing.JPanel {
 //            new AlphaTwoDotOne(), new AlphaTwoDotOneWithReplay(),
 //            new AlphaThreeDotZero(), new AlphaThreeDotZeroWithReplay()
             new StepBasedAlgorithm()};
-
+    private final Image helpImage = Toolkit.getDefaultToolkit().getImage(OptionsUI.class.getResource("/org/processmining/alpharevisitexperiments/help.png"));
     private HashMap<String, Object> optionValues = new HashMap<>();
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane optionsScrollPane;
     private ProMList<StepBasedAlgorithm> variantList;
-
-    private final Image helpImage = Toolkit.getDefaultToolkit().getImage(OptionsUI.class.getResource("/org/processmining/alpharevisitexperiments/help.png"));
-
+    private boolean optionsDisabled = false;
 
     public OptionsUI() {
         this(false);
@@ -46,19 +44,24 @@ public class OptionsUI extends javax.swing.JPanel {
         initComponents(compactMode);
     }
 
-    private static JTextArea createLabelWithTextWrap(String text) {
-        JTextArea textArea = new JTextArea(1, 30);
-        textArea.setText(text);
-        textArea.setWrapStyleWord(true);
-        textArea.setLineWrap(true);
-        textArea.setOpaque(false);
-        textArea.setEditable(false);
-        textArea.setFocusable(false);
-        textArea.setBackground(UIManager.getColor("Label.background"));
-        textArea.setFont(UIManager.getFont("Label.font"));
-        textArea.setBorder(UIManager.getBorder("Label.border"));
-        return textArea;
+    private static JLabel createLabelWithTextWrap(String text) {
+        JLabel label = new JLabel(text);
+        label.setBackground(Color.RED);
+        return label;
     }
+
+    public boolean isOptionsDisabled() {
+        return optionsDisabled;
+    }
+
+    public void setOptionsDisabled(boolean optionsDisabled) {
+        this.optionsDisabled = optionsDisabled;
+    }
+
+    public StepBasedAlgorithm[] getAlgorithmExperiments() {
+        return algorithmExperiments;
+    }
+
 
     @SuppressWarnings("unchecked")
     private void initComponents(boolean compactMode) {
@@ -132,7 +135,7 @@ public class OptionsUI extends javax.swing.JPanel {
         return variantList.getSelectedValuesList().get(0);
     }
 
-    private void variantListValueChanged(StepBasedAlgorithm experiment) {
+    public void variantListValueChanged(StepBasedAlgorithm experiment) {
         System.out.println("Changed Value " + variantList.getSelectedValuesList());
         this.jPanel1.removeAll();
         jPanel1.setLayout(new BoxLayout(jPanel1, BoxLayout.Y_AXIS));
@@ -152,8 +155,7 @@ public class OptionsUI extends javax.swing.JPanel {
 
         presetChooser.setMaximumSize(presetChooser.getPreferredSize());
         JLabel presetChooserLabel = new JLabel("Apply a Preset:");
-//        JButton presetApplyButton = new JButton("Apply Preset");
-//        presetChooser.addActionListener();
+        presetChooser.setEnabled(!optionsDisabled);
         presetChooser.addActionListener(e -> {
             String selectedPreset = presetChooser.getSelectedItem().toString();
             switch (selectedPreset) {
@@ -228,10 +230,12 @@ public class OptionsUI extends javax.swing.JPanel {
             jLabelStepName.setAlignmentX(LEFT_ALIGNMENT);
             jLabelStepName.setFont(new Font("Dialog", Font.BOLD, 18));
             jPanel1.add(jLabelStepName);
+            JPanel stepChooserPanel = new JPanel(new BorderLayout());
             JComboBox<String> stepChooser = new JComboBox<>();
             stepChooser.setBackground(Color.WHITE);
             stepChooser.setFont(new Font("Dialog", Font.BOLD, 14));
             stepChooser.setToolTipText("Change step");
+            stepChooser.setEnabled(!this.optionsDisabled);
             if (step instanceof LogRepairStep) {
                 stepChooser.addItem(IdentityLogRepair.NAME);
                 stepChooser.addItem(NamedTauLogRepair.NAME);
@@ -345,18 +349,36 @@ public class OptionsUI extends javax.swing.JPanel {
                 });
 
             }
-            stepChooser.setMaximumSize(stepChooser.getPreferredSize());
-            stepChooser.setAlignmentX(LEFT_ALIGNMENT);
-            jPanel1.add(stepChooser);
+            if (options.length == 0) {
+                stepChooserPanel.setBorder(new EmptyBorder(2, 0, 4, 0));
+            } else {
+                stepChooserPanel.setBorder(new EmptyBorder(2, 0, 2, 0));
+            }
+            JLabel stepChooserLabel = new JLabel("Step:");
+            stepChooserLabel.setFont(new Font("Dialog", Font.BOLD, 14));
+            stepChooserLabel.setBorder(BorderFactory.createEmptyBorder(0,0,0,10));
+            stepChooserPanel.add(stepChooserLabel, BorderLayout.WEST);
+            if(options.length > 0){
+                JLabel stepChooserOptionsLabel = new JLabel("Options:");
+                stepChooserOptionsLabel.setBorder(BorderFactory.createEmptyBorder(2,0,0,0));
+                stepChooserOptionsLabel.setFont(new Font("Dialog", Font.BOLD, 14));
+                stepChooserPanel.add(stepChooserOptionsLabel, BorderLayout.SOUTH);
+            }
+            stepChooserPanel.add(stepChooser, BorderLayout.EAST);
+            stepChooserPanel.setMaximumSize(stepChooserPanel.getPreferredSize());
+            stepChooserPanel.setAlignmentX(LEFT_ALIGNMENT);
+
+            jPanel1.add(stepChooserPanel);
             optionValues = new HashMap<>();
             for (ExperimentOption option : options) {
                 JPanel panel = new JPanel();
                 panel.setOpaque(false);
                 panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
                 panel.setAlignmentX(LEFT_ALIGNMENT);
-                JTextArea jLabelName = createLabelWithTextWrap(option.getName());
+                panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createCompoundBorder(BorderFactory.createEmptyBorder(0,4,2,0),BorderFactory.createMatteBorder(0, 2, 0, 0,Color.LIGHT_GRAY)),BorderFactory.createEmptyBorder(0,6,0,0)));
+                JLabel jLabelName = createLabelWithTextWrap(option.getName());
                 jLabelName.setAlignmentX(LEFT_ALIGNMENT);
-                jLabelName.setBorder(new EmptyBorder(5, 0, 2, 0));
+//                jLabelName.setBorder(new EmptyBorder(5, 0, 2, 0));
                 jLabelName.setFont(new Font("Dialog", Font.PLAIN, 16));
                 JPanel candidateChangeIndicator = new JPanel();
                 candidateChangeIndicator.setLayout(new BorderLayout());
@@ -370,53 +392,96 @@ public class OptionsUI extends javax.swing.JPanel {
                 });
                 hintButton.setToolTipText(option.getHintText());
                 hintButton.setAlignmentX(RIGHT_ALIGNMENT);
-                JPanel topPanel = new JPanel();
-                topPanel.add(jLabelName, LEFT_ALIGNMENT);
-                topPanel.add(hintButton, RIGHT_ALIGNMENT);
+                JPanel topPanel = new JPanel(new BorderLayout());
+                topPanel.add(jLabelName, BorderLayout.WEST);
+                topPanel.add(hintButton, BorderLayout.EAST);
                 topPanel.setAlignmentX(LEFT_ALIGNMENT);
-                candidateChangeIndicator.add(topPanel, BorderLayout.PAGE_START);
+                candidateChangeIndicator.add(topPanel, BorderLayout.NORTH);
 
                 if (option.getType() == Integer.class || option.getType() == Double.class) {
                     String leftIndicator = "";
                     String rightIndicator = "";
+                    String leftIndicatorHintText = "";
+                    String rightIndicatorHintText = "";
                     switch (option.getChangeIndicator()) {
                         case HIGH_INCREASES_CANDIDATES:
                             rightIndicator = "More Places";
+                            rightIndicatorHintText = "A higher value will generally lead to more discovered places (i.e., is less restrictive)";
                             leftIndicator = "Less Places";
+                            leftIndicatorHintText = "A lower value will generally lead to less discovered places (i.e., is more restrictive)";
                             break;
                         case HIGH_DECREASES_CANDIDATES:
                             rightIndicator = "Less Places";
+                            rightIndicatorHintText = "A higher value will generally lead to less discovered places (i.e., is more restrictive)";
                             leftIndicator = "More Places";
+                            leftIndicatorHintText = "A lower value will generally lead to more discovered places (i.e., is less restrictive)";
                             break;
                         case DEPENDS:
                             leftIndicator = "Depends";
                             rightIndicator = "Depends";
+                            leftIndicatorHintText = "A lower value has no clear general influence on the number of discovered places";
+                            rightIndicatorHintText = "A higher value has no clear general influence on the number of discovered places";
                             break;
                     }
                     JLabel hintNameLeft = new JLabel(leftIndicator);
                     hintNameLeft.setForeground(Color.DARK_GRAY);
                     hintNameLeft.setFont(new Font("Dialog", Font.ITALIC, 13));
+                    hintNameLeft.setMaximumSize(hintNameLeft.getPreferredSize());
+                    hintNameLeft.setToolTipText(leftIndicatorHintText);
+                    candidateChangeIndicator.add(hintNameLeft, BorderLayout.WEST);
+
                     JLabel hintNameRight = new JLabel(rightIndicator);
                     hintNameRight.setForeground(Color.DARK_GRAY);
+                    hintNameRight.setToolTipText(rightIndicatorHintText);
                     hintNameRight.setFont(new Font("Dialog", Font.ITALIC, 13));
-                    candidateChangeIndicator.add(hintNameLeft, BorderLayout.LINE_START);
-                    candidateChangeIndicator.add(hintNameRight, BorderLayout.LINE_END);
+                    hintNameRight.setMaximumSize(hintNameRight.getPreferredSize());
+                    candidateChangeIndicator.add(hintNameRight, BorderLayout.EAST);
                 }
                 candidateChangeIndicator.setAlignmentX(LEFT_ALIGNMENT);
                 panel.add(candidateChangeIndicator, LEFT_ALIGNMENT);
 
                 if (option.getType() == Integer.class) {
-                    ExperimentOption<Integer> integerOption = (ExperimentOption<Integer>) option;
-                    NiceIntegerSlider jslider = SlickerFactory.instance().createNiceIntegerSlider("Select", integerOption.getMinValue(), integerOption.getMaxValue(), integerOption.getStartValue(), NiceSlider.Orientation.HORIZONTAL);
-                    jslider.setValue(integerOption.getValue());
-                    jslider.setAlignmentX(LEFT_ALIGNMENT);
-                    jslider.addChangeListener(e -> integerOption.setValue(jslider.getValue()));
-                    panel.add(jslider);
+                    JPanel valuePanel = new JPanel();
+                    valuePanel.setOpaque(false);
+                    valuePanel.setAlignmentX(LEFT_ALIGNMENT);
+                    valuePanel.setLayout(new BorderLayout());
+                    ExperimentOption<Integer> intOption = (ExperimentOption<Integer>) option;
+
+                    JTextField intOptionExact = new JTextField(intOption.getValue().toString());
+                    intOptionExact.setFont(new Font("Dialog", Font.BOLD, 14));
+                    intOptionExact.setAlignmentX(CENTER_ALIGNMENT);
+                    NiceIntegerSlider slider = SlickerFactory.instance().createNiceIntegerSlider("Select", intOption.getMinValue(), intOption.getMaxValue(), intOption.getStartValue(), NiceSlider.Orientation.HORIZONTAL);
+                    slider.setAlignmentX(LEFT_ALIGNMENT);
+//                    slider.setValue(intOption.getValue());
+                    slider.addChangeListener(e -> {
+                        intOption.setValue(slider.getValue());
+                        intOptionExact.setText(intOption.getValue().toString());
+                    });
+
+                    slider.setEnabled(!this.optionsDisabled);
+                    intOptionExact.setEnabled(!this.optionsDisabled);
+
+                    intOptionExact.addActionListener(e -> {
+                        try {
+                            Integer newValue = Integer.parseInt(intOptionExact.getText());
+                            intOption.setValue(newValue);
+                            intOptionExact.setText(intOption.getValue().toString());
+                            slider.setValue(intOption.getValue());
+                        } catch (Exception exc) {
+                            intOptionExact.setText(intOption.getValue().toString());
+                        }
+
+                    });
+                    valuePanel.add(slider, BorderLayout.CENTER);
+                    valuePanel.add(intOptionExact, BorderLayout.PAGE_START);
+                    panel.add(valuePanel);
+
                 } else if (option.getType() == Boolean.class) {
                     ExperimentOption<Boolean> booleanOption = (ExperimentOption<Boolean>) option;
                     JCheckBox checkbox = SlickerFactory.instance().createCheckBox(booleanOption.getName(), booleanOption.getStartValue());
                     checkbox.setSelected(booleanOption.getValue());
                     checkbox.addChangeListener(e -> booleanOption.setValue(checkbox.isSelected()));
+                    checkbox.setEnabled(!optionsDisabled);
                     panel.add(checkbox);
                 } else if (option.getType() == Double.class) {
                     JPanel valuePanel = new JPanel();
@@ -430,7 +495,7 @@ public class OptionsUI extends javax.swing.JPanel {
                     doubleOptionExact.setAlignmentX(CENTER_ALIGNMENT);
                     NiceDoubleSlider slider = SlickerFactory.instance().createNiceDoubleSlider("Select", doubleOption.getMinValue(), doubleOption.getMaxValue(), doubleOption.getStartValue(), NiceSlider.Orientation.HORIZONTAL);
                     slider.setAlignmentX(LEFT_ALIGNMENT);
-                    slider.setValue(doubleOption.getValue());
+//                    slider.setValue(doubleOption.getValue());
                     slider.addChangeListener(e -> {
                         doubleOption.setValue(slider.getValue());
                         doubleOptionExact.setText(doubleOption.getValue().toString());
@@ -446,6 +511,10 @@ public class OptionsUI extends javax.swing.JPanel {
                         }
 
                     });
+
+                    slider.setEnabled(!this.optionsDisabled);
+                    doubleOptionExact.setEnabled(!this.optionsDisabled);
+
                     valuePanel.add(slider, BorderLayout.CENTER);
                     valuePanel.add(doubleOptionExact, BorderLayout.PAGE_START);
                     panel.add(valuePanel);
@@ -460,8 +529,7 @@ public class OptionsUI extends javax.swing.JPanel {
             seperator.setPreferredSize(new Dimension(1, 10));
             jPanel1.add(seperator);
         }
-        optionsScrollPane.setViewportView(jPanel1);
-        this.jPanel1.validate();
-        this.jPanel1.repaint();
+
+        this.validate();
     }
 }

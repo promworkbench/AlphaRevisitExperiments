@@ -14,6 +14,7 @@ import org.deckfour.xes.model.impl.*;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.acceptingpetrinet.models.impl.AcceptingPetriNetImpl;
 import org.processmining.alpharevisitexperiments.util.LogProcessor;
+import org.processmining.framework.util.Pair;
 import org.processmining.models.graphbased.NodeID;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
@@ -84,6 +85,7 @@ public class RustBridge {
 
     private static native String discoverPetriNetAlphaPPPFromActProj(String variantsJSON, String activitiesJSON, String algorithmConfig);
 
+    private static native String discoverPetriNetAlphaPPPFromActProjAuto(String variantsJSON, String activitiesJSON);
     private static native long importXESLog(String xesLogPath);
 
 
@@ -398,10 +400,7 @@ public class RustBridge {
         }
     }
 
-
-    public static AcceptingPetriNet runRustAlphaPPPDiscovery(LogProcessor lp, AlphaPPPConfig config) throws Exception {
-        System.out.println("Start Rust Discovery on log with " + lp.getNumberOfCases() + " cases");
-
+    public static Pair<String, String> buildActivityLogProjectionJSON(LogProcessor lp) {
         // Build list of all activities (including START/END acts!)
         String variantsJSON = gson.toJson(lp.getVariants());
         String[] lpActs = lp.getActivities().toArray(new String[]{});
@@ -413,16 +412,46 @@ public class RustBridge {
         activities[lpActs.length + 1] = LogProcessor.END_ACTIVITY;
         String activitiesJSON = gson.toJson(activities);
 
+        return new Pair<>(variantsJSON, activitiesJSON);
+    }
+
+    public static AcceptingPetriNet runRustAlphaPPPDiscovery(LogProcessor lp, AlphaPPPConfig config) throws Exception {
+        System.out.println("Start Rust Discovery on log with " + lp.getNumberOfCases() + " cases");
+
+        Pair<String, String> variantsAndActs = buildActivityLogProjectionJSON(lp);
         long startTime = System.nanoTime();
         try {
             String configJSON = gson.toJson(config, AlphaPPPConfig.class);
             System.out.println(configJSON);
-            String resJSON = discoverPetriNetAlphaPPPFromActProj(variantsJSON, activitiesJSON, configJSON);
+            String resJSON = discoverPetriNetAlphaPPPFromActProj(variantsAndActs.getFirst(), variantsAndActs.getSecond(), configJSON);
             PetriNetBridge bridgeNet = gson.fromJson(resJSON, PetriNetBridge.class);
             AcceptingPetriNet net = bridgePetriNetFromWrapper(bridgeNet);
             System.out.println("[Java] Total discovery (including full log copy!) took " + ((System.nanoTime() - startTime) / 1000000.0) + "ms");
             return net;
         } catch (Exception e) {
+            throw new Exception("Could not discover net");
+        }
+    }
+
+    public class AutoDiscoveryResult {
+        PetriNetBridge petri_net;
+        AlphaPPPConfig config;
+    }
+
+    public static Pair<AlphaPPPConfig, AcceptingPetriNet> runRustAlphaPPPDiscoveryAuto(LogProcessor lp) throws Exception {
+        System.out.println("Start AUTO Rust Discovery on log with " + lp.getNumberOfCases() + " cases");
+
+        Pair<String, String> variantsAndActs = buildActivityLogProjectionJSON(lp);
+        long startTime = System.nanoTime();
+        try {
+            String resJSON = discoverPetriNetAlphaPPPFromActProjAuto(variantsAndActs.getFirst(), variantsAndActs.getSecond());
+
+            AutoDiscoveryResult autoDiscoveryResult = gson.fromJson(resJSON, AutoDiscoveryResult.class);
+            AcceptingPetriNet net = bridgePetriNetFromWrapper(autoDiscoveryResult.petri_net);
+            System.out.println("[Java] Total discovery (including full log copy!) took " + ((System.nanoTime() - startTime) / 1000000.0) + "ms");
+            return new Pair<>(autoDiscoveryResult.config,net);
+        } catch (Exception e) {
+            e.printStackTrace();
             throw new Exception("Could not discover net");
         }
     }

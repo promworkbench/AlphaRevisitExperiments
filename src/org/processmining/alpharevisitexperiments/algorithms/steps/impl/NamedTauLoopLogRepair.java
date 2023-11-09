@@ -18,13 +18,20 @@ public class NamedTauLoopLogRepair extends LogRepairStep {
 
 
     final ExperimentOption[] options = {
-            new ExperimentOption<>(Double.class, "significant_df_threshold_relative", "DF Threshold (Relative to Mean DF Weight) (d)", 2.0, 0.1, 100000.0, "The specified (absolute) threshold determines which DF-relations to consider for detecting loops and skips.", ExperimentOptionCandidateChangeIndicator.DEPENDS),
+            new ExperimentOption<>(Double.class, "significant_df_threshold_relative", "DF Threshold (Relative to Mean DF Weight) (d)", 2.0, 0.1, 1000.0, "The specified (absolute) threshold determines which DF-relations to consider for detecting loops and skips.", ExperimentOptionCandidateChangeIndicator.DEPENDS),
     };
 
     public NamedTauLoopLogRepair() {
         super(NAME);
         setOptions(options);
     }
+
+    public NamedTauLoopLogRepair(double significant_df_threshold_relative) {
+        super(NAME);
+        options[0].setValue(significant_df_threshold_relative);
+        setOptions(options);
+    }
+
 
 
     private Set<String> getDFActs(String a, LogProcessor logProcessor, double df_threshold) {

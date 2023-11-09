@@ -23,6 +23,13 @@ public class CandidateTraceFittingFilter extends CandidatePruningStep {
         setOptions(options);
     }
 
+    public CandidateTraceFittingFilter(double min_fitting_traces) {
+        super(NAME);
+        options[0].setValue(min_fitting_traces);
+        setOptions(options);
+    }
+
+
     private static boolean getCandidateScore(LogProcessor logProcessor, Pair<Set<String>, Set<String>> candidate, double t) {
         int underfedTraces = 0;
         int overfedTraces = 0;

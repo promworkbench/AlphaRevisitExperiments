@@ -17,11 +17,17 @@ public class NamedTauLogRepair extends LogRepairStep {
     public final static String NAME = "Named Tau Log Repair";
 
     final ExperimentOption[] options = {
-            new ExperimentOption<>(Double.class, "significant_df_threshold_relative", "DF Threshold (Relative to Mean DF Weight) (d)", 2.0, 0.0, 100000.0, "The specified (absolute) threshold determines which DF-relations to consider for detecting loops and skips.", ExperimentOptionCandidateChangeIndicator.DEPENDS),
+            new ExperimentOption<>(Double.class, "significant_df_threshold_relative", "DF Threshold (Relative to Mean DF Weight) (d)", 2.0, 0.0, 1000.0, "The specified (absolute) threshold determines which DF-relations to consider for detecting loops and skips.", ExperimentOptionCandidateChangeIndicator.DEPENDS),
     };
 
     public NamedTauLogRepair() {
         super(NAME);
+        setOptions(options);
+    }
+
+    public NamedTauLogRepair(double significant_df_threshold_relative) {
+        super(NAME);
+        options[0].setValue(significant_df_threshold_relative);
         setOptions(options);
     }
 

@@ -28,6 +28,12 @@ public class ReplayNetPostProcessing extends PostProcessingPetriNetStep {
         setOptions(options);
     }
 
+    public ReplayNetPostProcessing(double replay_local_fitness_required) {
+        super(NAME);
+        options[0].setValue(replay_local_fitness_required);
+        setOptions(options);
+    }
+
     @Override
     public AcceptingPetriNet processPetriNet(UIPluginContext context, LogProcessor logProcessor, AcceptingPetriNet net) {
         Map<Place, Double> replayRes = ReplayProcessor.replayWithAllTraces(net, logProcessor.getVariants());

@@ -24,6 +24,13 @@ public class BalanceBasedCandidatePruning extends CandidatePruningStep {
         setOptions(options);
     }
 
+    public BalanceBasedCandidatePruning(double balance_value) {
+        super(NAME);
+        options[0].setValue(balance_value);
+        setOptions(options);
+    }
+
+
     @Override
     public Set<Pair<Set<String>, Set<String>>> pruneCandidates(UIPluginContext context, LogProcessor logProcessor, Set<Pair<Set<String>, Set<String>>> candidates) {
         this.logProcessor = logProcessor;
